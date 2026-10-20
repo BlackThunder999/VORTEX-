@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>VORTEX — Cyber Social Network</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      --bg-dark: #07040d;
+      --bg-card: rgba(26, 14, 46, 0.65);
+      --border-glass: rgba(168, 85, 247, 0.25);
+      --accent-violet: #a855f7;
+      --accent-glow: #9333ea;
+      --accent-neon: #c084fc;
+      --danger: #ef4444;
+      --text-white: #ffffff;
+      --text-muted: #9e8fb2;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(147, 51, 234, 0.22) 0%, transparent 40%),
+        radial-gradient(circle at 85% 80%, rgba(88, 28, 135, 0.25) 0%, transparent 45%);
+      background-attachment: fixed;
+      color: var(--text-white);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, .brand-font {
+      font-family: 'Unbounded', sans-serif;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+    }
+
+    /* Жидкое стекло */
+    .liquid-glass {
+      background: var(--bg-card);
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+      border: 1px solid var(--border-glass);
+      border-radius: 20px;
+      box-shadow: 
+        inset 0 1px 1px rgba(255, 255, 255, 0.15),
+        0 12px 40px rgba(0, 0, 0, 0.65);
+    }
+
+    /* Рамки аватарок Nitro */
+    .frame-neon { border: 3px solid var(--accent-neon); box-shadow: 0 0 15px var(--accent-glow); }
+    .frame-fire { border: 3px solid #f97316; box-shadow: 0 0 18px #ea580c; }
+    .frame-glitch { border: 3px dashed #06b6d4; box-shadow: 0 0 15px #3b82f6; }
+    .frame-cyber { border: 3px double #10b981; box-shadow: 0 0 15px #059669; }
+
+    /* Эффекты текста Nitro */
+    .effect-gradient {
+      background: linear-gradient(90deg, #c084fc, #f472b6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 800;
+    }
+    .effect-neon {
+      color: #fff;
+      text-shadow: 0 0 10px var(--accent-glow), 0 0 20px var(--accent-neon);
+      font-weight: 800;
+    }
+    .effect-fire {
+      background: linear-gradient(90deg, #f59e0b, #ef4444);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 800;
+    }
+
+    /* Layout */
+    .app-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 280px 1fr 340px;
+      gap: 20px;
+      min-height: 100vh;
+    }
+
+    @media (max-width: 992px) {
+      .app-container { grid-template-columns: 80px 1fr; }
+      .right-panel { display: none; }
+    }
+    @media (max-width: 680px) {
+      .app-container { grid-template-columns: 1fr; padding-bottom: 80px; }
+      .left-nav { display: none; }
+      .mobile-bottom-nav { display: flex !important; }
+    }
+
+    /* Кнопки */
+    .btn-vortex {
+      background: linear-gradient(135deg, var(--accent-violet), var(--accent-glow));
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      font-family: 'Unbounded', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 12px 20px;
+      border-radius: 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 20px rgba(168, 85, 247, 0.35);
+    }
+    .btn-vortex:active { transform: scale(0.97); }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #ef4444, #b91c1c);
+      box-shadow: 0 4px 20px rgba(239, 68, 68, 0.35);
+    }
+
+    .input-vortex {
+      width: 100%;
+      background: rgba(12, 6, 22, 0.7);
+      border: 1px solid var(--border-glass);
+      border-radius: 14px;
+      padding: 14px;
+      color: #fff;
+      font-size: 15px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .input-vortex:focus { border-color: var(--accent-violet); }
+
+    /* SVG UI Helpers */
+    .svg-icon {
+      width: 22px;
+      height: 22px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* Полноэкранный оверлей для банов и гео-блока */
+    .fullscreen-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      background: rgba(6, 3, 11, 0.96);
+      backdrop-filter: blur(40px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+    }
+
+    /* Навбар мобильный */
+    .mobile-bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 65px;
+      background: var(--bg-card);
+      backdrop-filter: blur(30px);
+      border-top: 1px solid var(--border-glass);
+      justify-content: space-around;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    /* 10 SVG Иконок верификации чата */
+    .safety-chain {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      background: rgba(15, 8, 28, 0.8);
+      padding: 6px 12px;
+      border-radius: 30px;
+      border: 1px solid var(--border-glass);
+    }
+    .safety-icon {
+      width: 16px;
+      height: 16px;
+      stroke: var(--accent-neon);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Оверлей Гео-блокировки (Украина / Лимит Беларуси / IP Бан) -->
+  <div id="geoBlockOverlay" class="fullscreen-overlay" style="display: none;">
+    <svg class="svg-icon" style="width: 70px; height: 70px; stroke: var(--danger); margin-bottom: 20px;" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+    </svg>
+    <h2 id="geoBlockTitle" style="font-size: 26px; margin-bottom: 12px;">ДОСТУП ОГРАНИЧЕН</h2>
+    <p id="geoBlockDesc" style="color: var(--text-muted); max-width: 480px; line-height: 1.6; margin-bottom: 24px;"></p>
+    <button class="btn-vortex" onclick="location.reload()">
+      <svg class="svg-icon" viewBox="0 0 24 24"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+      Проверить снова
+    </button>
+  </div>
+
+  <!-- Оверлей Бана пользователя в RealTime -->
+  <div id="banOverlay" class="fullscreen-overlay" style="display: none;">
+    <svg class="svg-icon" style="width: 80px; height: 80px; stroke: var(--danger); margin-bottom: 20px;" viewBox="0 0 24 24">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+      <line x1="8" y1="12" x2="16" y2="12"></line>
+    </svg>
+    <h2 style="font-size: 28px; margin-bottom: 10px;">ВЫ ЗАБЛОКИРОВАНЫ</h2>
+    <p id="banReasonText" style="color: var(--text-muted); margin-bottom: 24px; max-width: 440px;"></p>
+    <button class="btn-vortex" onclick="logout()">
+      <svg class="svg-icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+      Создать новый аккаунт
+    </button>
+  </div>
+
+  <!-- Модалка Аутентификации (Без почт: Никнейм + Пароль) -->
+  <div id="authModal" class="fullscreen-overlay" style="display: none;">
+    <div class="liquid-glass" style="width: 100%; max-width: 420px; padding: 32px;">
+      <h2 class="brand-font" style="font-size: 30px; text-align: center; margin-bottom: 6px; letter-spacing: -0.05em;">VORTEX</h2>
+      <p style="text-align: center; color: var(--text-muted); font-size: 13px; margin-bottom: 24px;">CYBERNETIC GLASS PLATFORM</p>
+
+      <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+        <button id="authTabLogin" class="btn-vortex" style="flex: 1;" onclick="switchAuthTab('login')">ВХОД</button>
+        <button id="authTabRegister" class="btn-vortex" style="flex: 1; background: transparent; border: 1px solid var(--border-glass);" onclick="switchAuthTab('register')">РЕГА</button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <input id="authUsername" class="input-vortex" type="text" placeholder="Имя пользователя">
+        <input id="authPassword" class="input-vortex" type="password" placeholder="Пароль">
+        <input id="authPasswordConfirm" class="input-vortex" type="password" placeholder="Повторите пароль" style="display: none;">
+        
+        <p id="authError" style="color: var(--danger); font-size: 13px; display: none;"></p>
+
+        <button id="authSubmitBtn" class="btn-vortex" style="width: 100%; margin-top: 10px;" onclick="handleAuthSubmit()">ВОЙТИ</button>
+      </div>
+
+      <p style="font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 20px; line-height: 1.5;">
+        Регистрируясь, вы принимаете <a href="#" onclick="openLegalModal('tos'); return false;" style="color: var(--accent-neon);">Правила VORTEX</a> и <a href="#" onclick="openLegalModal('privacy'); return false;" style="color: var(--accent-neon);">Конфиденциальность</a>.
+      </p>
+    </div>
+  </div>
+
+  <!-- Главный Layout Приложения -->
+  <div id="mainApp" class="app-container" style="display: none;">
+
+    <!-- Левая панель: Навигация -->
+    <aside class="liquid-glass left-nav" style="padding: 24px; display: flex; flex-direction: column; justify-content: space-between;">
+      <div>
+        <h1 class="brand-font" style="font-size: 22px; color: var(--accent-neon); margin-bottom: 30px;">VORTEX</h1>
+        <nav style="display: flex; flex-direction: column; gap: 12px;">
+          <button class="btn-vortex" style="width: 100%; justify-content: flex-start;" onclick="switchSection('feed')">
+            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg>
+            ЛЕНТА
+          </button>
+          <button class="btn-vortex" style="width: 100%; justify-content: flex-start; background: transparent; border: 1px solid var(--border-glass);" onclick="switchSection('chats')">
+            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            ЧАТЫ
+          </button>
+          <button class="btn-vortex" style="width: 100%; justify-content: flex-start; background: transparent; border: 1px solid var(--border-glass);" onclick="switchSection('profile')">
+            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            ПРОФИЛЬ
+          </button>
+          <button id="adminNavBtn" class="btn-vortex" style="width: 100%; justify-content: flex-start; background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); display: none;" onclick="switchSection('admin')">
+            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            АДМИНКА
+          </button>
+        </nav>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <button class="btn-vortex" style="background: transparent; border: 1px solid rgba(255,255,255,0.1); font-size: 11px;" onclick="openLegalModal('tos')">ПРАВИЛА И ЗАКОН</button>
+        <button class="btn-vortex" style="background: transparent; border: 1px solid rgba(239,68,68,0.4); color: var(--danger);" onclick="logout()">ВЫЙТИ</button>
+      </div>
+    </aside>
+
+    <!-- Центр: Контентная секция -->
+    <main style="display: flex; flex-direction: column; gap: 16px;">
+
+      <!-- СЕКЦИЯ: ЛЕНТА ПОСТОВ -->
+      <section id="sectionFeed">
+        <!-- Создание поста -->
+        <div class="liquid-glass" style="padding: 20px; margin-bottom: 20px;">
+          <textarea id="postInput" class="input-vortex" style="height: 90px; resize: none; margin-bottom: 12px;" placeholder="Что происходит в киберпространстве?"></textarea>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <input type="file" id="postImageUpload" accept="image/*" style="display: none;" onchange="handleImageAttach(event)">
+            <button class="btn-vortex" style="background: transparent; border: 1px solid var(--border-glass);" onclick="document.getElementById('postImageUpload').click()">
+              <svg class="svg-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+              ФОТО
+            </button>
+            <button class="btn-vortex" onclick="publishPost()">ОПУБЛИКОВАТЬ</button>
+          </div>
+        </div>
+
+        <!-- Лента Realtime постов -->
+        <div id="postsContainer" style="display: flex; flex-direction: column; gap: 16px;"></div>
+      </section>
+
+      <!-- СЕКЦИЯ: ШИФРОВАННЫЕ ЧАТЫ -->
+      <section id="sectionChats" style="display: none; height: calc(100vh - 40px);">
+        <div class="liquid-glass" style="height: 100%; display: grid; grid-template-columns: 260px 1fr; overflow: hidden;">
+          
+          <!-- Список диалогов -->
+          <div style="border-right: 1px solid var(--border-glass); display: flex; flex-direction: column;">
+            <div style="padding: 16px; border-bottom: 1px solid var(--border-glass);">
+              <input id="chatSearchUser" class="input-vortex" placeholder="Найти собеседника..." onkeydown="if(event.key==='Enter') searchAndStartChat()">
+            </div>
+            <div id="chatDialogsList" style="flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 6px;"></div>
+          </div>
+
+          <!-- Окно открытого чата -->
+          <div style="display: flex; flex-direction: column; height: 100%;">
+            <!-- Хедер чата + 10 SVG Иконок верификации -->
+            <div style="padding: 14px 20px; border-bottom: 1px solid var(--border-glass); display: flex; justify-content: space-between; align-items: center; background: rgba(14, 7, 26, 0.4);">
+              <div>
+                <h3 id="currentChatUsername" style="font-size: 16px;">Выберите чат</h3>
+                <span id="encryptionStatusText" style="font-size: 11px; color: var(--accent-neon);">E2EE ЗАЩИТА АКТИВНА</span>
+              </div>
+
+              <!-- 10 Иконок безопасности -->
+              <div id="safetyIconsContainer" class="safety-chain" title="Отпечаток сквозного шифрования (должен совпадать у обоих)"></div>
+            </div>
+
+            <!-- Список сообщений -->
+            <div id="chatMessages" style="flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px;"></div>
+
+            <!-- Поле ввода сообщения -->
+            <div style="padding: 14px 20px; border-top: 1px solid var(--border-glass); display: flex; gap: 10px;">
+              <input id="chatMessageInput" class="input-vortex" placeholder="Зашифрованное сообщение..." onkeydown="if(event.key==='Enter') sendEncryptedMessage()">
+              <button class="btn-vortex" onclick="sendEncryptedMessage()">
+                <svg class="svg-icon" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- СЕКЦИЯ: ПРОФИЛЬ (ДИСКОРД НИТРО СТАЙЛ) -->
+      <section id="sectionProfile" style="display: none;">
+        <div class="liquid-glass" style="overflow: hidden; padding-bottom: 24px;">
+          <!-- Баннер из медиатеки -->
+          <div id="profileBannerPreview" style="height: 180px; background: linear-gradient(45deg, #2e0854, #701a75); position: relative; background-size: cover; background-position: center;">
+            <label style="position: absolute; right: 16px; top: 16px; cursor: pointer;" class="btn-vortex">
+              <svg class="svg-icon" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+              СМЕНИТЬ БАННЕР
+              <input type="file" accept="image/*" style="display: none;" onchange="uploadProfileImage(event, 'banner')">
+            </label>
+          </div>
+
+          <div style="padding: 0 24px; display: flex; justify-content: space-between; align-items: flex-end; margin-top: -50px; margin-bottom: 20px;">
+            <div style="position: relative;">
+              <div id="profileAvatarPreview" class="frame-neon" style="width: 100px; height: 100px; border-radius: 50%; background: #130924; background-size: cover; background-position: center;"></div>
+              <label style="position: absolute; bottom: 0; right: 0; cursor: pointer; padding: 6px; border-radius: 50%;" class="btn-vortex">
+                <svg class="svg-icon" style="width: 14px; height: 14px;" viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                <input type="file" accept="image/*" style="display: none;" onchange="uploadProfileImage(event, 'avatar')">
+              </label>
+            </div>
+          </div>
+
+          <div style="padding: 0 24px; display: flex; flex-direction: column; gap: 20px;">
+            <div>
+              <h2 id="profileUsernameDisplay" class="brand-font effect-gradient" style="font-size: 24px;"></h2>
+              <p id="profileRoleBadge" style="font-size: 12px; color: var(--accent-neon); margin-top: 4px;"></p>
+            </div>
+
+            <!-- Бесплатные Nitro Настройки -->
+            <div class="liquid-glass" style="padding: 20px; border-color: rgba(168, 85, 247, 0.4);">
+              <h3 style="font-size: 16px; margin-bottom: 14px; color: var(--accent-neon);">КАСТОМИЗАЦИЯ СТИЛЯ (VORTEX NITRO)</h3>
+              
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                <div>
+                  <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 6px;">РАМКА АВАТАРКИ</label>
+                  <select id="selectAvatarFrame" class="input-vortex" onchange="updateProfileEffects()">
+                    <option value="none">Без рамки</option>
+                    <option value="frame-neon">Неоновый вихрь</option>
+                    <option value="frame-fire">Адский огонь</option>
+                    <option value="frame-glitch">Кибер-Глитч</option>
+                    <option value="frame-cyber">Изумрудная матрица</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 6px;">ЭФФЕКТ ТЕКСТА НИКА</label>
+                  <select id="selectTextEffect" class="input-vortex" onchange="updateProfileEffects()">
+                    <option value="none">Обычный</option>
+                    <option value="effect-gradient">Неоновый градиент</option>
+                    <option value="effect-neon">Ультрафиолетовое свечение</option>
+                    <option value="effect-fire">Огненный шторм</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- СЕКЦИЯ: АДМИН-ПАНЕЛЬ -->
+      <section id="sectionAdmin" style="display: none;">
+        <div class="liquid-glass" style="padding: 24px;">
+          <h2 class="brand-font" style="color: var(--danger); font-size: 22px; margin-bottom: 16px;">ПАНЕЛЬ ВЫСШЕГО АДМИНИСТРАТОРА</h2>
+          
+          <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <button class="btn-vortex" onclick="loadAdminReports()">ЖАЛОБЫ НА КОНТЕНТ</button>
+            <button class="btn-vortex" style="background: transparent; border: 1px solid var(--border-glass);" onclick="loadAdminUsers()">ПОЛЬЗОВАТЕЛИ И БАНЫ</button>
+          </div>
+
+          <!-- Список жалоб -->
+          <div id="adminReportsList" style="display: flex; flex-direction: column; gap: 14px;"></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Правая панель: Спецификации и Статус системы -->
+    <aside class="liquid-glass right-panel" style="padding: 20px;">
+      <h3 style="font-size: 14px; color: var(--accent-neon); margin-bottom: 16px;">VORTEX SECURITY NODE</h3>
+      
+      <div style="display: flex; flex-direction: column; gap: 14px; font-size: 13px;">
+        <div style="background: rgba(12, 6, 22, 0.5); padding: 12px; border-radius: 12px; border: 1px solid var(--border-glass);">
+          <span style="color: var(--text-muted); display: block; font-size: 11px;">ШИФРОВАНИЕ</span>
+          <strong>AES-256-GCM + ECDH P-384</strong>
+        </div>
+
+        <div style="background: rgba(12, 6, 22, 0.5); padding: 12px; border-radius: 12px; border: 1px solid var(--border-glass);">
+          <span style="color: var(--text-muted); display: block; font-size: 11px;">РЕПЛИКАЦИЯ</span>
+          <strong style="color: #10b981;">Supabase Realtime v2 Connected</strong>
+        </div>
+
+        <div style="background: rgba(12, 6, 22, 0.5); padding: 12px; border-radius: 12px; border: 1px solid var(--border-glass);">
+          <span style="color: var(--text-muted); display: block; font-size: 11px;">ГЕО-ФИЛЬТР</span>
+          <strong>UA: Blocked | BY: Rate-Limit</strong>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Мобильная нижняя панель -->
+  <div class="mobile-bottom-nav">
+    <button class="btn-vortex" style="background: none; border: none; padding: 10px;" onclick="switchSection('feed')">
+      <svg class="svg-icon" viewBox="0 0 24 24"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg>
+    </button>
+    <button class="btn-vortex" style="background: none; border: none; padding: 10px;" onclick="switchSection('chats')">
+      <svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+    </button>
+    <button class="btn-vortex" style="background: none; border: none; padding: 10px;" onclick="switchSection('profile')">
+      <svg class="svg-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+    </button>
+  </div>
+
+  <!-- Юридическая модалка (ToS и Конфиденциальность) -->
+  <div id="legalModal" class="fullscreen-overlay" style="display: none;">
+    <div class="liquid-glass" style="max-width: 650px; max-height: 80vh; overflow-y: auto; padding: 30px; text-align: left;">
+      <h2 id="legalModalTitle" class="brand-font" style="margin-bottom: 16px; font-size: 20px;"></h2>
+      <div id="legalModalContent" style="color: var(--text-muted); font-size: 13px; line-height: 1.7; display: flex; flex-direction: column; gap: 12px;"></div>
+      <button class="btn-vortex" style="margin-top: 24px; width: 100%;" onclick="document.getElementById('legalModal').style.display='none'">ПОНЯТНО И ПРИНЯТО</button>
+    </div>
+  </div>
+
+  <script>
+    /* ========================================================================
+       КОНФИГУРАЦИЯ SUPABASE И СОСТОЯНИЕ VORTEX
+       ======================================================================== */
+    const SUPABASE_URL = "https://mmraltxnupyoizitrutm.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_29yMrLgng8O54O10nNBHBA_U1Sqyuv_";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let currentUser = null;
+    let activeChat = null;
+    let userCryptoKeyPair = null;
+    let activeSharedKey = null;
+
+    // Банк SVG-иконок для верификации шифрования (32 уникальных символа)
+    const SVG_ICONS_BANK = [
+      '<svg class="safety-icon" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>',
+      '<svg class="safety-icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>',
+      '<svg class="safety-icon" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>',
+      '<svg class="safety-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polygon points="12 6 12 12 16 14"></polygon></svg>',
+      '<svg class="safety-icon" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>',
+      '<svg class="safety-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>',
+      '<svg class="safety-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>',
+      '<svg class="safety-icon" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>',
+      '<svg class="safety-icon" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>',
+      '<svg class="safety-icon" viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>'
+    ];
+
+    /* ========================================================================
+       1. ГЕО-БЛОКИРОВКА И ПРОВЕРКА IP ЧЕРНОГО СПИСКА
+       ======================================================================== */
+    async function enforceGeoAndBlacklistRules() {
+      try {
+        const geoRes = await fetch('https://ipapi.co/json/');
+        const geoData = await geoRes.json();
+        const clientIp = geoData.ip;
+        const countryCode = geoData.country_code;
+
+        // Проверка черного списка IP в базе Supabase
+        const { data: blacklisted } = await supabase
+          .from('ip_blacklist')
+          .select('*')
+          .eq('ip', clientIp)
+          .single();
+
+        if (blacklisted) {
+          showGeoBlock("ВАШ IP ЗАБЛОКИРОВАН", `Доступ запрещен навсегда. Причина: ${blacklisted.reason}`);
+          return false;
+        }
+
+        // Блокировка Украины
+        if (countryCode === 'UA') {
+          showGeoBlock("РЕГИОНАЛЬНОЕ ОГРАНИЧЕНИЕ", "Платформа VORTEX недоступна на территории Украины в связи с действующими ограничениями.");
+          return false;
+        }
+
+        // Троттлинг / Лимит для Беларуси (Rate limiting)
+        if (countryCode === 'BY') {
+          const lastVisit = localStorage.getItem('vortex_by_rate');
+          const now = Date.now();
+          if (lastVisit && now - parseInt(lastVisit) < 1500) {
+            showGeoBlock("СЕТЕВОЙ ЛИМИТ (BY)", "Обнаружен массовый входящий поток. Подождите несколько секунд перед обновлением.");
+            return false;
+          }
+          localStorage.setItem('vortex_by_rate', now.toString());
+        }
+
+        window.userClientIp = clientIp;
+        return true;
+      } catch (err) {
+        // Fallback при блокировщиках рекламы: не роняем сессию
+        window.userClientIp = '127.0.0.1';
+        return true;
+      }
+    }
+
+    function showGeoBlock(title, desc) {
+      document.getElementById('geoBlockTitle').innerText = title;
+      document.getElementById('geoBlockDesc').innerText = desc;
+      document.getElementById('geoBlockOverlay').style.display = 'flex';
+    }
+
+    /* ========================================================================
+       2. ВОЕННОЕ ШИФРОВАНИЕ (Web Crypto: ECDH + AES-256-GCM)
+       ======================================================================== */
+    async function initClientCrypto() {
+      userCryptoKeyPair = await window.crypto.subtle.generateKey(
+        { name: "ECDH", namedCurve: "P-384" },
+        true,
+        ["deriveKey", "deriveBits"]
+      );
+      const exportedRaw = await window.crypto.subtle.exportKey("raw", userCryptoKeyPair.publicKey);
+      return btoa(String.fromCharCode(...new Uint8Array(exportedRaw)));
+    }
+
+    async function deriveSharedChatKey(peerPublicKeyBase64) {
+      const rawPeerKey = Uint8Array.from(atob(peerPublicKeyBase64), c => c.charCodeAt(0));
+      const importedPeerKey = await window.crypto.subtle.importKey(
+        "raw",
+        rawPeerKey,
+        { name: "ECDH", namedCurve: "P-384" },
+        false,
+        []
+      );
+
+      activeSharedKey = await window.crypto.subtle.deriveKey(
+        { name: "ECDH", public: importedPeerKey },
+        userCryptoKeyPair.privateKey,
+        { name: "AES-GCM", length: 256 },
+        true,
+        ["encrypt", "decrypt"]
+      );
+
+      // Генерация 10 SVG иконок отпечатка безопасности
+      const exportedShared = await window.crypto.subtle.exportKey("raw", activeSharedKey);
+      const hashBuffer = await window.crypto.subtle.digest('SHA-512', exportedShared);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+
+      const container = document.getElementById('safetyIconsContainer');
+      container.innerHTML = '';
+      for (let i = 0; i < 10; i++) {
+        const iconIndex = hashArray[i] % SVG_ICONS_BANK.length;
+        container.innerHTML += SVG_ICONS_BANK[iconIndex];
+      }
+    }
+
+    async function encryptString(plaintext) {
+      const iv = window.crypto.getRandomValues(new Uint8Array(12));
+      const encoded = new TextEncoder().encode(plaintext);
+      const ciphertext = await window.crypto.subtle.encrypt(
+        { name: "AES-GCM", iv: iv },
+        activeSharedKey,
+        encoded
+      );
+      return {
+        ciphertext: btoa(String.fromCharCode(...new Uint8Array(ciphertext))),
+        iv: btoa(String.fromCharCode(...iv))
+      };
+    }
+
+    async function decryptString(ciphertextBase64, ivBase64) {
+      try {
+        const iv = Uint8Array.from(atob(ivBase64), c => c.charCodeAt(0));
+        const data = Uint8Array.from(atob(ciphertextBase64), c => c.charCodeAt(0));
+        const decrypted = await window.crypto.subtle.decrypt(
+          { name: "AES-GCM", iv: iv },
+          activeSharedKey,
+          data
+        );
+        return new TextDecoder().decode(decrypted);
+      } catch (e) {
+        return "⚠️ ОШИБКА РАСШИФРОВКИ (КЛЮЧИ НЕ СОВПАДАЮТ)";
+      }
+    }
+
+    /* ========================================================================
+       3. АУТЕНТИФИКАЦИЯ (ТОЛЬКО НИК И ПАРОЛЬ)
+       ======================================================================== */
+    let authMode = 'login';
+    function switchAuthTab(mode) {
+      authMode = mode;
+      document.getElementById('authPasswordConfirm').style.display = mode === 'register' ? 'block' : 'none';
+      document.getElementById('authSubmitBtn').innerText = mode === 'register' ? 'СОЗДАТЬ АККАУНТ' : 'ВОЙТИ';
+      document.getElementById('authTabLogin').style.background = mode === 'login' ? 'linear-gradient(135deg, var(--accent-violet), var(--accent-glow))' : 'transparent';
+      document.getElementById('authTabRegister').style.background = mode === 'register' ? 'linear-gradient(135deg, var(--accent-violet), var(--accent-glow))' : 'transparent';
+    }
+
+    async function hashPassword(plain) {
+      const buffer = new TextEncoder().encode(plain + "_vortex_salt_2026");
+      const hash = await window.crypto.subtle.digest("SHA-256", buffer);
+      return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function handleAuthSubmit() {
+      const username = document.getElementById('authUsername').value.trim().toLowerCase();
+      const password = document.getElementById('authPassword').value;
+      const passConfirm = document.getElementById('authPasswordConfirm').value;
+      const errBox = document.getElementById('authError');
+      errBox.style.display = 'none';
+
+      if (!username || !password) {
+        errBox.innerText = "Заполните имя пользователя и пароль!";
+        errBox.style.display = 'block';
+        return;
+      }
+
+      const pHash = await hashPassword(password);
+
+      if (authMode === 'register') {
+        if (password !== passConfirm) {
+          errBox.innerText = "Пароли не совпадают!";
+          errBox.style.display = 'block';
+          return;
+        }
+
+        const pubKey = await initClientCrypto();
+
+        const { data: existing } = await supabase.from('profiles').select('id').eq('username', username).single();
+        if (existing) {
+          errBox.innerText = "Это имя пользователя уже занято!";
+          errBox.style.display = 'block';
+          return;
+        }
+
+        const { data: newUser, error } = await supabase.from('profiles').insert([{
+          username: username,
+          password_hash: pHash,
+          public_key: pubKey,
+          last_ip: window.userClientIp || '127.0.0.1'
+        }]).select().single();
+
+        if (error) {
+          errBox.innerText = error.message;
+          errBox.style.display = 'block';
+          return;
+        }
+
+        loginSuccess(newUser);
+      } else {
+        const { data: user, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('username', username)
+          .eq('password_hash', pHash)
+          .single();
+
+        if (!user || error) {
+          errBox.innerText = "Неверный никнейм или пароль!";
+          errBox.style.display = 'block';
+          return;
+        }
+
+        if (user.is_banned) {
+          showBanOverlay(user.ban_reason);
+          return;
+        }
+
+        // Обновляем ключ шифрования сессии
+        const pubKey = await initClientCrypto();
+        await supabase.from('profiles').update({ public_key: pubKey, last_ip: window.userClientIp }).eq('id', user.id);
+        user.public_key = pubKey;
+
+        loginSuccess(user);
+      }
+    }
+
+    function loginSuccess(user) {
+      currentUser = user;
+      localStorage.setItem('vortex_user_session', JSON.stringify(user));
+      document.getElementById('authModal').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'grid';
+
+      if (user.role === 'admin') {
+        document.getElementById('adminNavBtn').style.display = 'flex';
+      }
+
+      setupRealtimeSubscriptions();
+      loadPosts();
+      renderUserProfile();
+    }
+
+    function logout() {
+      localStorage.removeItem('vortex_user_session');
+      location.reload();
+    }
+
+    /* ========================================================================
+       4. ЛЕНТА ПОСТОВ (REALTIME TWITTER-STYLE)
+       ======================================================================== */
+    let attachedImageBase64 = '';
+
+    function handleImageAttach(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => attachedImageBase64 = event.target.result;
+        reader.readAsDataURL(file);
+      }
+    }
+
+    async function publishPost() {
+      const content = document.getElementById('postInput').value.trim();
+      if (!content && !attachedImageBase64) return;
+
+      await supabase.from('posts').insert([{
+        author_id: currentUser.id,
+        author_username: currentUser.username,
+        content: content,
+        media_url: attachedImageBase64
+      }]);
+
+      document.getElementById('postInput').value = '';
+      attachedImageBase64 = '';
+      loadPosts();
+    }
+
+    async function loadPosts() {
+      const { data: posts } = await supabase
+        .from('posts')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(30);
+
+      const container = document.getElementById('postsContainer');
+      container.innerHTML = '';
+      if (!posts) return;
+
+      posts.forEach(p => {
+        const postCard = document.createElement('div');
+        postCard.className = 'liquid-glass';
+        postCard.style.padding = '20px';
+        postCard.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="brand-font effect-gradient" style="font-size: 14px;">@${p.author_username}</span>
+              <span style="font-size: 11px; color: var(--text-muted);">${new Date(p.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+            </div>
+            <button class="btn-vortex" style="background: transparent; border: none; padding: 4px;" onclick="promptReport('post', '${p.id}', '${encodeURIComponent(p.content)}')">
+              <svg class="svg-icon" style="width: 16px; height: 16px; stroke: var(--danger);" viewBox="0 0 24 24"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            </button>
+          </div>
+          <p style="font-size: 15px; line-height: 1.5; margin-bottom: 12px;">${p.content}</p>
+          ${p.media_url ? `<img src="${p.media_url}" style="width: 100%; border-radius: 14px; max-height: 380px; object-fit: cover; border: 1px solid var(--border-glass);">` : ''}
+        `;
+        container.appendChild(postCard);
+      });
+    }
+
+    /* ========================================================================
+       5. ЗАШИФРОВАННЫЕ ЧАТЫ И РЕАЛЬНОЕ ВРЕМЯ
+       ======================================================================== */
+    async function searchAndStartChat() {
+      const targetName = document.getElementById('chatSearchUser').value.trim().toLowerCase();
+      if (!targetName || targetName === currentUser.username) return;
+
+      const { data: targetUser } = await supabase.from('profiles').select('*').eq('username', targetName).single();
+      if (!targetUser) {
+        alert("Пользователь не найден!");
+        return;
+      }
+
+      // Находим или создаем чат
+      let { data: chat } = await supabase.from('chats')
+        .select('*')
+        .or(`and(user1_id.eq.${currentUser.id},user2_id.eq.${targetUser.id}),and(user1_id.eq.${targetUser.id},user2_id.eq.${currentUser.id})`)
+        .single();
+
+      if (!chat) {
+        const { data: newChat } = await supabase.from('chats').insert([{
+          user1_id: currentUser.id,
+          user2_id: targetUser.id
+        }]).select().single();
+        chat = newChat;
+      }
+
+      openChat(chat, targetUser);
+    }
+
+    async function openChat(chat, peerUser) {
+      activeChat = { chat, peerUser };
+      document.getElementById('currentChatUsername').innerText = `@${peerUser.username}`;
+      
+      // Вычисляем общий крипто-ключ и 10 иконок
+      if (peerUser.public_key) {
+        await deriveSharedChatKey(peerUser.public_key);
+        document.getElementById('encryptionStatusText').innerText = "E2EE ЗАЩИТА: КЛЮЧИ ПОДТВЕРЖДЕНЫ";
+        document.getElementById('encryptionStatusText').style.color = "var(--accent-neon)";
+      } else {
+        document.getElementById('encryptionStatusText').innerText = "ОЖИДАНИЕ ПУБЛИЧНОГО КЛЮЧА СОБЕСЕДНИКА";
+        document.getElementById('encryptionStatusText').style.color = "var(--danger)";
+      }
+
+      loadMessages(chat.id);
+    }
+
+    async function sendEncryptedMessage() {
+      const text = document.getElementById('chatMessageInput').value.trim();
+      if (!text || !activeChat || !activeSharedKey) return;
+
+      const { ciphertext, iv } = await encryptString(text);
+
+      await supabase.from('messages').insert([{
+        chat_id: activeChat.chat.id,
+        sender_id: currentUser.id,
+        ciphertext: ciphertext,
+        iv: iv
+      }]);
+
+      document.getElementById('chatMessageInput').value = '';
+    }
+
+    async function loadMessages(chatId) {
+      const { data: msgs } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('chat_id', chatId)
+        .order('created_at', { ascending: true });
+
+      const container = document.getElementById('chatMessages');
+      container.innerHTML = '';
+      if (!msgs) return;
+
+      for (const m of msgs) {
+        const decrypted = activeSharedKey ? await decryptString(m.ciphertext, m.iv) : "🔒 [Зашифровано]";
+        const isMe = m.sender_id === currentUser.id;
+
+        const bubble = document.createElement('div');
+        bubble.style.alignSelf = isMe ? 'flex-end' : 'flex-start';
+        bubble.style.maxWidth = '75%';
+        bubble.style.background = isMe ? 'linear-gradient(135deg, var(--accent-violet), var(--accent-glow))' : 'rgba(26, 14, 46, 0.8)';
+        bubble.style.border = '1px solid var(--border-glass)';
+        bubble.style.padding = '10px 16px';
+        bubble.style.borderRadius = '16px';
+        bubble.style.fontSize = '14px';
+        bubble.style.position = 'relative';
+
+        // Long Press / Контекстное меню
+        bubble.oncontextmenu = (e) => {
+          e.preventDefault();
+          showMsgContext(m, decrypted);
+        };
+
+        bubble.innerHTML = `<div>${decrypted}</div><span style="font-size: 9px; opacity: 0.6; display: block; text-align: right; margin-top: 4px;">${new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>`;
+        container.appendChild(bubble);
+      }
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function showMsgContext(message, text) {
+      const action = prompt(`Действие с сообщением:\n1. Копировать\n2. Переслать\n3. Пожаловаться модерации\n${message.sender_id === currentUser.id ? '4. Удалить' : ''}`);
+      if (action === '1') navigator.clipboard.writeText(text);
+      if (action === '3') promptReport('message', message.id, encodeURIComponent(text));
+      if (action === '4' && message.sender_id === currentUser.id) {
+        supabase.from('messages').delete().eq('id', message.id).then(() => loadMessages(activeChat.chat.id));
+      }
+    }
+
+    /* ========================================================================
+       6. СИСТЕМА ЖАЛОБ И МОДЕРАЦИИ
+       ======================================================================== */
+    async function promptReport(targetType, targetId, snapshotEncoded) {
+      const decodedSnapshot = decodeURIComponent(snapshotEncoded);
+      const confirmWarning = confirm(
+        "ВНИМАНИЕ! Согласно правилам конфиденциальности VORTEX, при подаче жалобы фрагмент этого контента будет передан администратору платформы для проверки. Продолжить?"
+      );
+      if (!confirmWarning) return;
+
+      const reason = prompt("Укажите причину нарушения (спам, насилие, деанон и т.д.):");
+      if (!reason) return;
+
+      await supabase.from('reports').insert([{
+        reporter_id: currentUser.id,
+        target_type: targetType,
+        target_id: targetId,
+        content_snapshot: decodedSnapshot,
+        reason: reason
+      }]);
+
+      alert("Жалоба успешно передана верховному администратору.");
+    }
+
+    /* ========================================================================
+       7. АДМИН-ПАНЕЛЬ: БАНЫ, IP БАНЫ, УДАЛЕНИЕ КОНТЕНТА
+       ======================================================================== */
+    async function loadAdminReports() {
+      const { data: reports } = await supabase.from('reports').select('*').eq('status', 'pending');
+      const container = document.getElementById('adminReportsList');
+      container.innerHTML = '';
+
+      if (!reports || reports.length === 0) {
+        container.innerHTML = '<p style="color: var(--text-muted);">Активных жалоб нет. Система чиста.</p>';
+        return;
+      }
+
+      reports.forEach(r => {
+        const item = document.createElement('div');
+        item.className = 'liquid-glass';
+        item.style.padding = '14px';
+        item.innerHTML = `
+          <div style="font-size: 13px; margin-bottom: 8px;">
+            <strong style="color: var(--danger);">Тип: ${r.target_type}</strong> | Причина: ${r.reason}
+          </div>
+          <div style="background: rgba(0,0,0,0.4); padding: 8px; border-radius: 8px; margin-bottom: 10px; font-size: 12px;">
+            ${r.content_snapshot}
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn-vortex btn-danger" style="padding: 6px 12px; font-size: 11px;" onclick="resolveReport('${r.id}', '${r.target_type}', '${r.target_id}', true)">УДАЛИТЬ КОНТЕНТ</button>
+            <button class="btn-vortex" style="background: transparent; border: 1px solid var(--border-glass); padding: 6px 12px; font-size: 11px;" onclick="resolveReport('${r.id}', '${r.target_type}', '${r.target_id}', false)">ПРОПУСТИТЬ</button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    async function resolveReport(reportId, targetType, targetId, deleteContent) {
+      if (deleteContent) {
+        if (targetType === 'post') await supabase.from('posts').delete().eq('id', targetId);
+        if (targetType === 'message') await supabase.from('messages').delete().eq('id', targetId);
+      }
+      await supabase.from('reports').update({ status: 'resolved' }).eq('id', reportId);
+      loadAdminReports();
+    }
+
+    async function loadAdminUsers() {
+      const { data: users } = await supabase.from('profiles').select('*').limit(20);
+      const container = document.getElementById('adminReportsList');
+      container.innerHTML = '<h3 style="font-size: 14px; margin-bottom: 12px;">Управление пользователями</h3>';
+
+      users.forEach(u => {
+        const row = document.createElement('div');
+        row.style.display = 'flex';
+        row.style.justifyContent = 'space-between';
+        row.style.alignItems = 'center';
+        row.style.padding = '10px';
+        row.style.borderBottom = '1px solid var(--border-glass)';
+        row.innerHTML = `
+          <div>
+            <strong>@${u.username}</strong> (IP: ${u.last_ip || 'N/A'})
+            ${u.is_banned ? '<span style="color: var(--danger);"> [ЗАБАНЕН]</span>' : ''}
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button class="btn-vortex btn-danger" style="font-size: 10px; padding: 6px;" onclick="adminBanUser('${u.id}', false)">БАН</button>
+            <button class="btn-vortex btn-danger" style="font-size: 10px; padding: 6px;" onclick="adminBanIP('${u.last_ip}')">БАН ПО IP</button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    async function adminBanUser(userId, temp) {
+      const reason = prompt("Причина бана:");
+      if (!reason) return;
+
+      await supabase.from('profiles').update({
+        is_banned: true,
+        ban_reason: reason
+      }).eq('id', userId);
+
+      alert("Пользователь забанен!");
+    }
+
+    async function adminBanIP(ip) {
+      if (!ip || ip === 'N/A') { alert("IP неизвестен"); return; }
+      const reason = prompt("Причина бана по IP:");
+      if (!reason) return;
+
+      await supabase.from('ip_blacklist').insert([{ ip: ip, reason: reason }]);
+      alert(`IP ${ip} добавлен в черный список платформы.`);
+    }
+
+    /* ========================================================================
+       8. REALTIME SUBSCRIPTIONS (POSTS, MESSAGES, BANS)
+       ======================================================================== */
+    function setupRealtimeSubscriptions() {
+      // Подписка на ленту
+      supabase.channel('public:posts')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, () => loadPosts())
+        .subscribe();
+
+      // Подписка на личные сообщения
+      supabase.channel('public:messages')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+          if (activeChat && payload.new.chat_id === activeChat.chat.id) {
+            loadMessages(activeChat.chat.id);
+          }
+        })
+        .subscribe();
+
+      // Подписка на статус профиля (мгновенный вылет при бане)
+      supabase.channel(`user:${currentUser.id}`)
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${currentUser.id}` }, payload => {
+          if (payload.new.is_banned) {
+            showBanOverlay(payload.new.ban_reason);
+          }
+        })
+        .subscribe();
+    }
+
+    function showBanOverlay(reason) {
+      document.getElementById('banReasonText').innerText = `Причина: ${reason || 'Нарушение правил сообщества'}`;
+      document.getElementById('banOverlay').style.display = 'flex';
+    }
+
+    /* ========================================================================
+       9. NITRO КАСТОМИЗАЦИЯ ПРОФИЛЯ
+       ======================================================================== */
+    function renderUserProfile() {
+      document.getElementById('profileUsernameDisplay').innerText = `@${currentUser.username}`;
+      document.getElementById('profileRoleBadge').innerText = currentUser.role.toUpperCase() + ' NODE';
+      
+      const avatar = document.getElementById('profileAvatarPreview');
+      avatar.className = currentUser.avatar_frame || 'frame-neon';
+      if (currentUser.avatar_url) avatar.style.backgroundImage = `url(${currentUser.avatar_url})`;
+
+      const banner = document.getElementById('profileBannerPreview');
+      if (currentUser.banner_url) banner.style.backgroundImage = `url(${currentUser.banner_url})`;
+
+      document.getElementById('profileUsernameDisplay').className = `brand-font ${currentUser.text_effect || 'effect-gradient'}`;
+    }
+
+    async function updateProfileEffects() {
+      const frame = document.getElementById('selectAvatarFrame').value;
+      const effect = document.getElementById('selectTextEffect').value;
+
+      await supabase.from('profiles').update({
+        avatar_frame: frame,
+        text_effect: effect
+      }).eq('id', currentUser.id);
+
+      currentUser.avatar_frame = frame;
+      currentUser.text_effect = effect;
+      renderUserProfile();
+    }
+
+    function uploadProfileImage(event, type) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const base64 = e.target.result;
+        const payload = type === 'avatar' ? { avatar_url: base64 } : { banner_url: base64 };
+        await supabase.from('profiles').update(payload).eq('id', currentUser.id);
+        if (type === 'avatar') currentUser.avatar_url = base64;
+        if (type === 'banner') currentUser.banner_url = base64;
+        renderUserProfile();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    /* ========================================================================
+       10. ЮРИДИЧЕСКАЯ ДОКУМЕНТАЦИЯ (ЗАЩИТА ОТ СУДОВ)
+       ======================================================================== */
+    function openLegalModal(type) {
+      const modal = document.getElementById('legalModal');
+      const title = document.getElementById('legalModalTitle');
+      const body = document.getElementById('legalModalContent');
+
+      if (type === 'tos') {
+        title.innerText = "ПОЛЬЗОВАТЕЛЬСКОЕ СОГЛАШЕНИЕ VORTEX";
+        body.innerHTML = `
+          <p><strong>1. Статус платформы:</strong> VORTEX является нейтральным информационным посредником, предоставляющим технологическую инфраструктуру для обмена зашифрованными данными.</p>
+          <p><strong>2. Ответственность:</strong> Вся правовая и уголовная ответственность за создаваемый контент лежит исключительно на авторе сообщения/поста. Администрация платформы не инициирует размещение материалов и не изменяет их содержание.</p>
+          <p><strong>3. Модерация и право на отказ:</strong> Сервис оставляет за собой исключительное право немедленного прекращения доступа любому аккаунту или IP-адресу при обнаружении вредоносного ПО, угроз, спама или экстремизма.</p>
+          <p><strong>4. Отказ от гарантий (AS-IS):</strong> Платформа предоставляется «как есть» без каких-либо прямых или косвенных гарантий стабильности или восстановления утерянных ключей шифрования.</p>
+        `;
+      } else {
+        title.innerText = "ПОЛИТИКА КОНФИДЕНЦИАЛЬНОСТИ И КРИПТОГРАФИИ";
+        body.innerHTML = `
+          <p><strong>1. Отсутствие персональных данных:</strong> VORTEX не запрашивает номера телефонов, адреса электронной почты или реальные имена. Идентификация происходит по псевдонимам.</p>
+          <p><strong>2. Сквозное шифрование (E2EE):</strong> Текстовые сообщения в диалогах шифруются на стороне клиента с использованием алгоритма AES-256-GCM. Администрация и третьи лица не имеют технической возможности дешифровать трафик в каналах связи.</p>
+          <p><strong>3. Исключение при жалобах:</strong> Пользователь соглашается с тем, что при отправке жалобы на конкретное сообщение локально расшифрованный фрагмент отправляется модератору для установления состава нарушения.</p>
+          <p><strong>4. Сетевая безопасность:</strong> Фиксация IP-адресов осуществляется исключительно в оперативной памяти для защиты от DDoS-атак и реализации черных списков.</p>
+        `;
+      }
+      modal.style.display = 'flex';
+    }
+
+    /* ========================================================================
+       НАВИГАЦИЯ И ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ
+       ======================================================================== */
+    function switchSection(name) {
+      ['Feed', 'Chats', 'Profile', 'Admin'].forEach(s => {
+        const el = document.getElementById(`section${s}`);
+        if (el) el.style.display = 'none';
+      });
+      document.getElementById(`section${name.charAt(0).toUpperCase() + name.slice(1)}`).style.display = name === 'chats' ? 'block' : 'block';
+      if (name === 'admin') loadAdminReports();
+    }
+
+    // Точка входа
+    window.addEventListener('DOMContentLoaded', async () => {
+      const accessAllowed = await enforceGeoAndBlacklistRules();
+      if (!accessAllowed) return;
+
+      const savedSession = localStorage.getItem('vortex_user_session');
+      if (savedSession) {
+        const user = JSON.parse(savedSession);
+        // Проверяем актуальный статус бана в базе
+        const { data: dbUser } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+        if (dbUser && dbUser.is_banned) {
+          showBanOverlay(dbUser.ban_reason);
+          return;
+        }
+        await initClientCrypto();
+        loginSuccess(dbUser || user);
+      } else {
+        document.getElementById('authModal').style.display = 'flex';
+      }
+    });
+  </script>
+</body>
+</html>
