@@ -3,26 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>VORTEX</title>
+  <title>VORTEX MAX</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800;900&family=Inter:wght@500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Unbounded:wght@700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     :root {
-      --bg-black: #000000;
-      --bg-card: rgba(255, 255, 255, 0.04);
-      --bg-card-subtle: rgba(255, 255, 255, 0.02);
-      --border-white: rgba(255, 255, 255, 0.14);
-      --border-hover: rgba(255, 255, 255, 0.4);
-      --accent-white: #ffffff;
-      --accent-gray: #a3a3a3;
-      --accent-dark-gray: #262626;
-      --accent-danger: #ffffff;
-      --danger-border: rgba(255, 80, 80, 0.6);
+      --bg-main: #0c0d10;
+      --bg-surface: #16171b;
+      --bg-card: #1f2026;
+      --bg-card-hover: #26272e;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --accent-blue: #2563eb;
+      --accent-blue-glow: #3b82f6;
+      --accent-danger: #ef4444;
       --text-main: #ffffff;
-      --text-sub: #8e8e93;
+      --text-secondary: #8e909a;
+      --text-muted: #5e606b;
+      --badge-red: #ef4444;
     }
 
     * {
@@ -38,401 +38,553 @@
     }
 
     body {
-      background-color: var(--bg-black);
+      background-color: var(--bg-main);
       color: var(--text-main);
       font-family: 'Inter', -apple-system, sans-serif;
-      font-weight: 700;
       min-height: 100vh;
       overflow-x: hidden;
     }
 
-    h1, h2, h3, .heavy-font {
+    .brand-font {
       font-family: 'Unbounded', sans-serif;
-      font-weight: 900 !important;
-      letter-spacing: -0.04em;
-      text-transform: uppercase;
+      font-weight: 800;
+      letter-spacing: -0.03em;
     }
 
-    /* Монохромное жидкое стекло */
-    .glass-panel {
-      background: var(--bg-card);
-      backdrop-filter: blur(40px) saturate(140%);
-      -webkit-backdrop-filter: blur(40px) saturate(140%);
-      border: 1px solid var(--border-white);
-      border-radius: 20px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
+    /* Верхняя статусная панель */
+    .top-bar {
+      padding: 16px 20px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      background: rgba(12, 13, 16, 0.88);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      z-index: 100;
     }
 
-    .glass-panel-subtle {
-      background: var(--bg-card-subtle);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 14px;
+    .page-title {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .main-view-container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 0 16px calc(80px + env(safe-area-inset-bottom, 0px));
+    }
+
+    /* Группы настроек в стиле MAX / Telegram */
+    .settings-group {
+      background: var(--bg-surface);
+      border-radius: 16px;
+      margin-bottom: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .settings-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: background 0.15s;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .settings-item:last-child {
+      border-bottom: none;
+    }
+    .settings-item:active {
+      background: var(--bg-card-hover);
+    }
+
+    .settings-item-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .settings-icon-box {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+    }
+
+    .settings-item-text {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .settings-item-subtext {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .arrow-icon {
+      stroke: var(--text-muted);
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Профиль плашка */
+    .profile-card {
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+    }
+
+    .avatar-wrap {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: #1f2026;
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      flex-shrink: 0;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Нижний бар MAX */
+    .tabbar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: calc(58px + env(safe-area-inset-bottom, 0px));
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      background: rgba(18, 19, 23, 0.95);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 999;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      position: relative;
+    }
+    .tab-btn.active {
+      color: var(--accent-blue-glow);
+    }
+    .tab-btn.active svg {
+      stroke: var(--accent-blue-glow);
+    }
+
+    .tab-badge {
+      position: absolute;
+      top: -2px;
+      right: 4px;
+      background: var(--badge-red);
+      color: #fff;
+      font-size: 9px;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 10px;
+    }
+
+    /* Чат окно */
+    .chat-bubble {
+      max-width: 80%;
+      padding: 10px 14px;
+      border-radius: 16px;
+      font-size: 14px;
+      line-height: 1.4;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .chat-bubble.out {
+      align-self: flex-end;
+      background: var(--accent-blue);
+      color: #ffffff;
+      border-bottom-right-radius: 4px;
+    }
+    .chat-bubble.in {
+      align-self: flex-start;
+      background: var(--bg-surface);
+      color: #ffffff;
+      border-bottom-left-radius: 4px;
+      border: 1px solid var(--border-subtle);
     }
 
     .btn-vortex {
-      background: var(--accent-white);
-      color: #000000;
-      font-family: 'Unbounded', sans-serif;
-      font-size: 11px;
-      font-weight: 900;
-      padding: 13px 20px;
-      border-radius: 14px;
+      background: var(--accent-blue);
+      color: #fff;
       border: none;
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-weight: 700;
+      font-size: 13px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      transition: all 0.2s ease;
-    }
-    .btn-vortex:active { transform: scale(0.96); }
-
-    .btn-ghost {
-      background: transparent;
-      color: #ffffff;
-      border: 1px solid var(--border-white);
-    }
-    .btn-ghost:hover {
-      border-color: var(--border-hover);
-      background: rgba(255, 255, 255, 0.06);
-    }
-
-    .btn-danger {
-      background: #1c0000;
-      color: #ff5555;
-      border: 1px solid var(--danger-border);
     }
 
     .input-vortex {
       width: 100%;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid var(--border-white);
-      border-radius: 14px;
-      padding: 14px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 12px 16px;
       color: #ffffff;
       font-size: 14px;
-      font-weight: 600;
-      font-family: 'Inter', sans-serif;
+      font-weight: 500;
       outline: none;
-      transition: border 0.2s;
     }
     .input-vortex:focus {
-      border-color: var(--accent-white);
+      border-color: var(--accent-blue-glow);
     }
 
-    /* Верхняя панель */
-    .header-bar {
-      max-width: 1000px;
-      margin: 14px auto;
-      padding: 14px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .app-layout {
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 0 16px calc(90px + env(safe-area-inset-bottom, 0px));
-      min-height: calc(100vh - 120px);
-    }
-
-    /* Мобильный бар на 3 вкладки */
-    .bottom-navbar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: calc(64px + env(safe-area-inset-bottom, 0px));
-      padding-bottom: env(safe-area-inset-bottom, 0px);
-      background: rgba(0, 0, 0, 0.92);
-      backdrop-filter: blur(30px);
-      -webkit-backdrop-filter: blur(30px);
-      border-top: 1px solid var(--border-white);
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      z-index: 9999;
-    }
-
-    .nav-tab-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-sub);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      cursor: pointer;
-      font-family: 'Unbounded', sans-serif;
-      font-size: 9px;
-      font-weight: 900;
-    }
-    .nav-tab-btn.active {
-      color: var(--accent-white);
-    }
-    .nav-tab-btn.active svg {
-      stroke: var(--accent-white);
-    }
-
-    .svg-icon {
-      width: 22px;
-      height: 22px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2.2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
+    /* Модалки */
     .modal-backdrop {
       position: fixed;
       inset: 0;
       z-index: 99999;
-      background: rgba(0, 0, 0, 0.96);
-      backdrop-filter: blur(40px);
-      -webkit-backdrop-filter: blur(40px);
+      background: rgba(8, 9, 12, 0.95);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 24px;
+      padding: 20px;
     }
 
-    /* Переключатель Toggle Switch */
-    .switch-wrap {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 0;
-    }
     .switch-ui {
-      position: relative;
-      width: 48px;
-      height: 26px;
+      width: 44px;
+      height: 24px;
       background: rgba(255, 255, 255, 0.15);
-      border-radius: 13px;
+      border-radius: 12px;
+      position: relative;
       cursor: pointer;
       transition: background 0.2s;
     }
     .switch-ui::after {
       content: '';
       position: absolute;
-      top: 3px;
-      left: 3px;
+      top: 2px;
+      left: 2px;
       width: 20px;
       height: 20px;
-      background: #ffffff;
+      background: #fff;
       border-radius: 50%;
       transition: transform 0.2s;
     }
     .switch-ui.active {
-      background: #ffffff;
+      background: var(--accent-blue);
     }
     .switch-ui.active::after {
-      background: #000000;
-      transform: translateX(22px);
-    }
-
-    /* Селектор номера */
-    .phone-group {
-      display: flex;
-      gap: 8px;
-    }
-    .country-select {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--border-white);
-      color: #fff;
-      font-family: 'Inter', sans-serif;
-      font-weight: 700;
-      padding: 0 10px;
-      border-radius: 14px;
-      outline: none;
-    }
-
-    .chat-bubble {
-      max-width: 78%;
-      padding: 12px 16px;
-      border-radius: 18px;
-      font-size: 14px;
-      line-height: 1.4;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .chat-bubble.out {
-      align-self: flex-end;
-      background: #ffffff;
-      color: #000000;
-    }
-    .chat-bubble.in {
-      align-self: flex-start;
-      background: rgba(255, 255, 255, 0.08);
-      color: #ffffff;
-      border: 1px solid var(--border-white);
+      transform: translateX(20px);
     }
   </style>
 </head>
 <body>
 
-  <!-- БАН ПАНЕЛЬ -->
-  <div id="banOverlay" class="modal-backdrop" style="display: none;">
-    <h2 class="heavy-font" style="font-size: 26px; margin-bottom: 12px;">СЕТЬ ЗАБЛОКИРОВАНА</h2>
-    <p id="banReasonText" style="color: var(--text-sub); margin-bottom: 24px; text-align: center; font-size: 13px;"></p>
-    <button class="btn-vortex" onclick="logoutSession()">ВЫХОД</button>
-  </div>
-
   <!-- ВХОД / РЕГИСТРАЦИЯ ПО ТЕЛЕФОНУ -->
   <div id="authScreen" class="modal-backdrop" style="display: none;">
-    <div class="glass-panel" style="width: 100%; max-width: 380px; padding: 32px 24px;">
-      <h2 class="heavy-font" style="font-size: 24px; text-align: center; margin-bottom: 4px;">VORTEX</h2>
-      <p style="text-align: center; color: var(--text-sub); font-size: 11px; margin-bottom: 24px; font-weight: 800;">SECURE ENCRYPTED NETWORK</p>
+    <div style="width: 100%; max-width: 360px; background: var(--bg-surface); padding: 28px 20px; border-radius: 20px; border: 1px solid var(--border-subtle);">
+      <h2 class="brand-font" style="font-size: 22px; text-align: center; margin-bottom: 4px;">VORTEX MAX</h2>
+      <p style="text-align: center; color: var(--text-secondary); font-size: 12px; margin-bottom: 22px;">Быстрый и защищённый мессенджер</p>
 
-      <div style="display: flex; gap: 8px; margin-bottom: 18px;">
-        <button id="authTab_login" class="btn-vortex" style="flex: 1;" onclick="toggleAuthMode('login')">ВХОД</button>
-        <button id="authTab_reg" class="btn-vortex btn-ghost" style="flex: 1;" onclick="toggleAuthMode('register')">РЕГА</button>
+      <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+        <button id="authTab_login" class="btn-vortex" style="flex: 1;" onclick="toggleAuthMode('login')">Вход</button>
+        <button id="authTab_reg" class="btn-vortex" style="flex: 1; background: var(--bg-card); color: var(--text-secondary);" onclick="toggleAuthMode('register')">Регистрация</button>
       </div>
 
       <div style="display: flex; flex-direction: column; gap: 12px;">
-        <div class="phone-group">
-          <select id="countryPrefix" class="country-select">
+        <div style="display: flex; gap: 8px;">
+          <select id="countryPrefix" style="background: var(--bg-card); border: 1px solid var(--border-subtle); color: #fff; border-radius: 12px; padding: 0 8px; font-weight: 600; outline: none;">
             <option value="+7">🇷🇺 +7</option>
             <option value="+375">🇧🇾 +375</option>
             <option value="+7_KZ">🇰🇿 +7</option>
             <option value="+998">🇺🇿 +998</option>
-            <option value="+374">🇦🇲 +374</option>
-            <option value="+995">🇬🇪 +995</option>
           </select>
-          <input id="inputPhoneNumber" class="input-vortex" type="tel" placeholder="9990001122">
+          <input id="inputPhoneNumber" class="input-vortex" type="tel" placeholder="Номер телефона">
         </div>
 
-        <input id="inputAuthUsername" class="input-vortex" type="text" placeholder="Никнейм (@username)" style="display: none;">
+        <input id="inputAuthUsername" class="input-vortex" type="text" placeholder="Имя пользователя (@username)" style="display: none;">
         <input id="inputAuthPassword" class="input-vortex" type="password" placeholder="Пароль">
 
-        <p id="authErrorMsg" style="color: #ff5555; font-size: 12px; display: none; font-weight: 800;"></p>
-
-        <button id="authSubmitAction" class="btn-vortex" style="width: 100%; margin-top: 8px;" onclick="handleAuthSubmit()">ВОЙТИ</button>
+        <p id="authErrorMsg" style="color: var(--accent-danger); font-size: 12px; display: none; font-weight: 600;"></p>
+        <button id="authSubmitAction" class="btn-vortex" style="margin-top: 6px;" onclick="handleAuthSubmit()">Продолжить</button>
       </div>
     </div>
   </div>
 
-  <!-- ШАПКА -->
-  <header id="mainHeader" class="header-bar glass-panel" style="display: none;">
-    <h1 class="heavy-font" style="font-size: 18px;">VORTEX</h1>
-    <div id="adminBadgeNode" style="display: none;">
-      <span style="font-size: 10px; background: #ffffff; color: #000000; padding: 4px 8px; border-radius: 6px; font-weight: 900;">ADMIN</span>
+  <!-- ГЛАВНЫЙ ИНТЕРФЕЙС -->
+  <div id="mainInterface" style="display: none;">
+
+    <!-- 1. ВКЛАДКА: КОНТАКТЫ -->
+    <div id="viewContacts" class="main-view-container" style="display: none;">
+      <div class="top-bar">
+        <h1 class="page-title">Контакты</h1>
+      </div>
+      <div style="margin: 12px 0 16px;">
+        <input id="globalSearchQuery" class="input-vortex" placeholder="Поиск по @username или номеру..." onkeydown="if(event.key==='Enter') executeUserSearch()">
+      </div>
+      <div id="searchResultsArea" style="display: flex; flex-direction: column; gap: 8px;"></div>
     </div>
-  </header>
 
-  <!-- ОСНОВНОЙ КОНТЕЙНЕР -->
-  <div id="mainInterface" class="app-layout" style="display: none;">
+    <!-- 2. ВКЛАДКА: ЗВОНКИ -->
+    <div id="viewCalls" class="main-view-container" style="display: none;">
+      <div class="top-bar">
+        <h1 class="page-title">Звонки</h1>
+      </div>
+      <div class="settings-group" style="padding: 24px; text-align: center; margin-top: 20px;">
+        <p style="color: var(--text-secondary); font-size: 14px;">История звонков пуста</p>
+        <span style="font-size: 12px; color: var(--text-muted); display: block; margin-top: 4px;">Все вызовы шифруются E2EE-протоколом</span>
+      </div>
+    </div>
 
-    <!-- ВКЛАДКА 1: ЧАТЫ -->
-    <section id="viewChats" style="height: calc(100vh - 160px); display: flex; flex-direction: column;">
-      
-      <!-- Список бесед -->
-      <div id="chatsListContainer" class="glass-panel" style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
-        <div style="padding: 14px; border-bottom: 1px solid var(--border-white);">
-          <input id="dialogFilter" class="input-vortex" placeholder="Поиск диалогов..." oninput="filterDialogs()">
-        </div>
-        <div id="activeDialogsBox" style="flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px;"></div>
+    <!-- 3. ВКЛАДКА: ЧАТЫ -->
+    <div id="viewChats" class="main-view-container">
+      <div class="top-bar">
+        <h1 class="page-title">Чаты</h1>
       </div>
 
-      <!-- Окно переписки -->
-      <div id="chatRoomContainer" class="glass-panel" style="display: none; height: 100%; flex-direction: column; overflow: hidden;">
-        
-        <!-- Заголовок чата -->
-        <div style="padding: 14px 18px; border-bottom: 1px solid var(--border-white); display: flex; justify-content: space-between; align-items: center;">
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <button class="btn-vortex btn-ghost" style="padding: 6px 12px; font-size: 10px;" onclick="closeChatRoom()">← НАЗАД</button>
-            <div>
-              <h3 id="currentChatPeerName" class="heavy-font" style="font-size: 14px;">ПОЛЬЗОВАТЕЛЬ</h3>
-              <span id="currentChatPeerPhone" style="font-size: 11px; color: var(--text-sub);"></span>
-            </div>
+      <!-- Список диалогов -->
+      <div id="chatsListContainer">
+        <div style="margin: 12px 0 16px;">
+          <input class="input-vortex" placeholder="Поиск сообщений и чатов...">
+        </div>
+        <div id="activeDialogsBox" style="display: flex; flex-direction: column; gap: 8px;"></div>
+      </div>
+
+      <!-- Окно открытого чата -->
+      <div id="chatRoomContainer" style="display: none; height: calc(100vh - 130px); flex-direction: column;">
+        <div style="padding: 10px 0; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border-subtle);">
+          <button class="btn-vortex" style="background: transparent; padding: 6px;" onclick="closeChatRoom()">
+            <svg style="width: 20px; height: 20px; stroke: #fff; fill: none; stroke-width: 2.2;" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          </button>
+          <div>
+            <h3 id="currentChatPeerName" style="font-size: 15px; font-weight: 700;">Собеседник</h3>
+            <span id="currentChatPeerPhone" style="font-size: 11px; color: var(--text-secondary);"></span>
           </div>
-          <span style="font-size: 10px; border: 1px solid var(--border-white); padding: 4px 8px; border-radius: 20px;">E2EE AES-256</span>
         </div>
 
-        <!-- Сообщения -->
-        <div id="chatMessagesScroll" style="flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px;"></div>
+        <div id="chatMessagesScroll" style="flex: 1; overflow-y: auto; padding: 14px 0; display: flex; flex-direction: column; gap: 8px;"></div>
 
-        <!-- Панель отправки -->
-        <div style="padding: 12px 16px; border-top: 1px solid var(--border-white); display: flex; gap: 8px; align-items: center;">
+        <div style="display: flex; gap: 8px; align-items: center; padding-top: 8px;">
           <input type="file" id="mediaUploadField" style="display: none;" onchange="handleOutgoingAttachment(event)">
-          <button class="btn-vortex btn-ghost" style="padding: 10px;" onclick="document.getElementById('mediaUploadField').click()">
-            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+          <button class="btn-vortex" style="background: var(--bg-surface); padding: 10px;" onclick="document.getElementById('mediaUploadField').click()">
+            <svg style="width: 20px; height: 20px; stroke: #fff; fill: none; stroke-width: 2;" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
           </button>
-
-          <input id="outgoingMessageInput" class="input-vortex" placeholder="Напишите сообщение..." onkeydown="if(event.key==='Enter') sendEncryptedPayload()">
-          
+          <input id="outgoingMessageInput" class="input-vortex" placeholder="Сообщение..." onkeydown="if(event.key==='Enter') sendEncryptedPayload()">
           <button class="btn-vortex" onclick="sendEncryptedPayload()">
-            <svg class="svg-icon" style="width: 18px; height: 18px;" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            <svg style="width: 18px; height: 18px; stroke: #fff; fill: none; stroke-width: 2.5;" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
           </button>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- ВКЛАДКА 2: КОНТАКТЫ И ПОИСК -->
-    <section id="viewContacts" style="display: none;">
-      <div class="glass-panel" style="padding: 22px;">
-        <h2 class="heavy-font" style="font-size: 18px; margin-bottom: 6px;">ПОИСК ЛЮДЕЙ</h2>
-        <p style="font-size: 12px; color: var(--text-sub); margin-bottom: 16px;">Поиск работает по никнейму (@username) или по номеру телефона</p>
-
-        <div style="display: flex; gap: 8px; margin-bottom: 20px;">
-          <input id="globalSearchQuery" class="input-vortex" placeholder="Введите @username или номер (+7999...)" onkeydown="if(event.key==='Enter') executeUserSearch()">
-          <button class="btn-vortex" onclick="executeUserSearch()">НАЙТИ</button>
-        </div>
-
-        <div id="searchResultsArea" style="display: flex; flex-direction: column; gap: 10px;"></div>
+    <!-- 4. ВКЛАДКА: НАСТРОЙКИ (КОПИЯ СКРИНШОТА MAX) -->
+    <div id="viewSettings" class="main-view-container" style="display: none;">
+      <div class="top-bar">
+        <h1 class="page-title">Настройки</h1>
       </div>
-    </section>
 
-    <!-- ВКЛАДКА 3: НАСТРОЙКИ И ПРОФИЛЬ -->
-    <section id="viewProfile" style="display: none;">
-      <div class="glass-panel" style="padding: 24px; display: flex; flex-direction: column; gap: 20px;">
-        
-        <div>
-          <h2 id="profileUsernameVal" class="heavy-font" style="font-size: 20px;">@USER</h2>
-          <p id="profilePhoneVal" style="color: var(--text-sub); font-size: 13px; margin-top: 4px;"></p>
-        </div>
-
-        <div class="glass-panel-subtle" style="padding: 18px;">
-          <h3 class="heavy-font" style="font-size: 13px; margin-bottom: 10px;">ПРИВАТНОСТЬ И БЕЗОПАСНОСТЬ</h3>
-          
-          <div class="switch-wrap">
-            <div>
-              <span style="font-size: 13px; display: block;">Скрыть номер телефона</span>
-              <span style="font-size: 11px; color: var(--text-sub);">Номер пропадет из профиля, и вас нельзя будет найти по нему</span>
-            </div>
-            <div id="hidePhoneSwitch" class="switch-ui" onclick="toggleHidePhoneSetting()"></div>
+      <!-- Плашка Профиля -->
+      <div class="settings-group">
+        <div class="settings-item profile-card">
+          <div id="profileAvatarNode" class="avatar-wrap"></div>
+          <div style="flex: 1;">
+            <h3 id="profileNameDisplay" style="font-size: 16px; font-weight: 700;">User</h3>
+            <p id="profilePhoneDisplay" style="font-size: 13px; color: var(--text-secondary); margin-top: 2px;">+7 ...</p>
           </div>
+          <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+
+      <!-- Пригласить и Сервисы -->
+      <div class="settings-group">
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-icon-box" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">
+              <svg style="width: 18px; height: 18px; fill: currentColor;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
+            </div>
+            <span class="settings-item-text">Войти в Сферум</span>
+          </div>
+          <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-icon-box" style="color: #a855f7;">
+              <svg style="width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2;" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            </div>
+            <span class="settings-item-text">Пригласить друзей</span>
+          </div>
+          <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+
+      <!-- Основные разделы управления -->
+      <div class="settings-group">
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-icon-box">
+              <svg style="width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2;" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            </div>
+            <span class="settings-item-text">Уведомления</span>
+          </div>
+          <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
 
-        <button class="btn-vortex btn-ghost btn-danger" style="margin-top: 10px;" onclick="logoutSession()">ВЫЙТИ ИЗ АККАУНТА</button>
+        <div class="settings-item" onclick="openSecuritySheet()">
+          <div class="settings-item-left">
+            <div class="settings-icon-box">
+              <svg style="width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2;" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <div>
+              <span class="settings-item-text">Безопасность</span>
+              <span class="settings-item-subtext" style="display: block;">E2EE шифрование, ключи</span>
+            </div>
+          </div>
+          <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-icon-box">
+              <svg style="width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2;" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </div>
+            <span class="settings-item-text">Устройства</span>
+          </div>
+          <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
       </div>
-    </section>
+
+      <!-- Контент и кастомизация -->
+      <div class="settings-group">
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-icon-box">
+              <svg style="width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <span class="settings-item-text">Мои истории</span>
+          </div>
+          <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-icon-box">
+              <svg style="width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2;" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <span class="settings-item-text">Папки</span>
+          </div>
+          <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-icon-box">
+              <svg style="width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2;" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <span class="settings-item-text">Оформление</span>
+          </div>
+          <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-icon-box">
+              <svg style="width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            </div>
+            <span class="settings-item-text">Язык приложения</span>
+          </div>
+          <span style="font-size: 13px; color: var(--text-secondary);">Русский</span>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-icon-box">
+              <svg style="width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2;" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            </div>
+            <span class="settings-item-text">MAX для бизнеса</span>
+          </div>
+          <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+
+      <button class="btn-vortex" style="width: 100%; background: var(--bg-surface); color: var(--accent-danger); border: 1px solid rgba(239, 68, 68, 0.2); margin-top: 10px;" onclick="logoutSession()">Выйти из профиля</button>
+    </div>
   </div>
 
-  <!-- НАВБАР МЕНЮ -->
-  <nav id="bottomBar" class="bottom-navbar" style="display: none;">
-    <button id="tabBtn_chats" class="nav-tab-btn active" onclick="switchMainTab('chats')">
-      <svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-      <span>ЧАТЫ</span>
+  <!-- ШИТ БЕЗОПАСНОСТИ -->
+  <div id="securityModal" class="modal-backdrop" style="display: none;">
+    <div style="width: 100%; max-width: 420px; background: var(--bg-surface); padding: 24px; border-radius: 20px; border: 1px solid var(--border-subtle);">
+      <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 14px;">Безопасность и Приватность</h3>
+      
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-subtle);">
+        <div>
+          <span style="font-size: 14px; font-weight: 600; display: block;">Скрыть номер телефона</span>
+          <span style="font-size: 12px; color: var(--text-secondary);">Номер не виден в профиле и скрыт от поиска</span>
+        </div>
+        <div id="hidePhoneToggle" class="switch-ui" onclick="togglePrivacySetting()"></div>
+      </div>
+
+      <div style="padding: 12px 0; border-bottom: 1px solid var(--border-subtle);">
+        <span style="font-size: 14px; font-weight: 600; display: block;">Шифрование диалогов</span>
+        <span style="font-size: 12px; color: var(--text-secondary);">Военный протокол AES-256-GCM + ECDH</span>
+      </div>
+
+      <button class="btn-vortex" style="width: 100%; margin-top: 20px;" onclick="document.getElementById('securityModal').style.display='none'">Готово</button>
+    </div>
+  </div>
+
+  <!-- ТАББАР (4 Вкладки в стиле MAX) -->
+  <nav id="bottomTabbar" class="tabbar" style="display: none;">
+    <button id="tab_contacts" class="tab-btn" onclick="switchNavTab('contacts')">
+      <svg style="width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2;" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>Контакты</span>
     </button>
-    <button id="tabBtn_contacts" class="nav-tab-btn" onclick="switchMainTab('contacts')">
-      <svg class="svg-icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-      <span>КОНТАКТЫ</span>
+    <button id="tab_calls" class="tab-btn" onclick="switchNavTab('calls')">
+      <svg style="width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2;" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91"/></svg>
+      <span>Звонки</span>
     </button>
-    <button id="tabBtn_profile" class="nav-tab-btn" onclick="switchMainTab('profile')">
-      <svg class="svg-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-      <span>ПРОФИЛЬ</span>
+    <button id="tab_chats" class="tab-btn active" onclick="switchNavTab('chats')">
+      <div class="tab-badge">2</div>
+      <svg style="width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2;" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>Чаты</span>
+    </button>
+    <button id="tab_settings" class="tab-btn" onclick="switchNavTab('settings')">
+      <svg style="width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Настройки</span>
     </button>
   </nav>
 
   <script>
-    /* ========================================================================
-       КОНФИГУРАЦИЯ SUPABASE И КРИПТОГРАФИЯ
-       ======================================================================== */
     const SUPABASE_URL = "https://mmraltxnupyoizitrutm.supabase.co";
     const SUPABASE_KEY = "sb_publishable_29yMrLgng8O54O10nNBHBA_U1Sqyuv_";
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -442,8 +594,8 @@
     let localECDHKey = null;
     let sharedSecretKey = null;
 
-    /* Генерация криптографических ключей */
-    async function initClientCrypto() {
+    /* Web Crypto API */
+    async function initCrypto() {
       localECDHKey = await window.crypto.subtle.generateKey(
         { name: "ECDH", namedCurve: "P-384" },
         true,
@@ -502,112 +654,102 @@
       }
     }
 
-    /* ========================================================================
-       АВТОРИЗАЦИЯ ПО ТЕЛЕФОНУ + ПАРОЛЬ
-       ======================================================================== */
+    /* Авторизация */
     let authMode = 'login';
     function toggleAuthMode(mode) {
       authMode = mode;
       document.getElementById('inputAuthUsername').style.display = mode === 'register' ? 'block' : 'none';
-      document.getElementById('authSubmitAction').innerText = mode === 'register' ? 'СОЗДАТЬ' : 'ВОЙТИ';
-      document.getElementById('authTab_login').className = mode === 'login' ? 'btn-vortex' : 'btn-vortex btn-ghost';
-      document.getElementById('authTab_reg').className = mode === 'register' ? 'btn-vortex' : 'btn-vortex btn-ghost';
+      document.getElementById('authSubmitAction').innerText = mode === 'register' ? 'Создать аккаунт' : 'Продолжить';
+      document.getElementById('authTab_login').style.background = mode === 'login' ? 'var(--accent-blue)' : 'var(--bg-card)';
+      document.getElementById('authTab_login').style.color = mode === 'login' ? '#fff' : 'var(--text-secondary)';
+      document.getElementById('authTab_reg').style.background = mode === 'register' ? 'var(--accent-blue)' : 'var(--bg-card)';
+      document.getElementById('authTab_reg').style.color = mode === 'register' ? '#fff' : 'var(--text-secondary)';
     }
 
-    function formatFullPhone() {
+    function formatPhone() {
       let prefix = document.getElementById('countryPrefix').value;
       if (prefix === '+7_KZ') prefix = '+7';
-      const cleanNumber = document.getElementById('inputPhoneNumber').value.replace(/\D/g, '');
-      return prefix + cleanNumber;
+      const clean = document.getElementById('inputPhoneNumber').value.replace(/\D/g, '');
+      return prefix + clean;
     }
 
-    async function hashUserPassword(pass) {
+    async function hashPassword(pass) {
       const encoded = new TextEncoder().encode(pass + "_vortex_salt_2026");
       const digest = await window.crypto.subtle.digest("SHA-256", encoded);
       return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
     async function handleAuthSubmit() {
-      const fullPhone = formatFullPhone();
+      const phone = formatPhone();
       const password = document.getElementById('inputAuthPassword').value;
       const username = document.getElementById('inputAuthUsername').value.trim().toLowerCase();
       const errBox = document.getElementById('authErrorMsg');
       errBox.style.display = 'none';
 
       if (!password || document.getElementById('inputPhoneNumber').value.length < 5) {
-        errBox.innerText = "Укажите корректный номер и пароль";
+        errBox.innerText = "Укажите верный номер и пароль";
         errBox.style.display = 'block';
         return;
       }
 
-      const passHash = await hashUserPassword(password);
+      const pHash = await hashPassword(password);
 
       if (authMode === 'register') {
         if (!username) {
-          errBox.innerText = "Придумайте никнейм";
+          errBox.innerText = "Укажите имя пользователя (@username)";
           errBox.style.display = 'block';
           return;
         }
 
-        const pubKey = await initClientCrypto();
+        const pubKey = await initCrypto();
 
-        const { data: userCreated, error } = await supabase.from('profiles').insert([{
-          phone: fullPhone,
+        const { data: newUser, error } = await supabase.from('profiles').insert([{
+          phone: phone,
           username: username,
-          password_hash: passHash,
+          password_hash: pHash,
           public_key: pubKey,
           hide_phone: false
         }]).select().single();
 
         if (error) {
-          errBox.innerText = error.message.includes('unique') ? "Номер или никнейм уже занят" : error.message;
+          errBox.innerText = error.message.includes('unique') ? "Номер или имя уже заняты" : error.message;
           errBox.style.display = 'block';
           return;
         }
 
-        completeSession(userCreated);
+        onAuthSuccess(newUser);
       } else {
-        const { data: userProfile, error } = await supabase
+        const { data: user, error } = await supabase
           .from('profiles')
           .select('*')
-          .eq('phone', fullPhone)
-          .eq('password_hash', passHash)
+          .eq('phone', phone)
+          .eq('password_hash', pHash)
           .single();
 
-        if (!userProfile || error) {
-          errBox.innerText = "Неверный номер телефона или пароль";
+        if (!user || error) {
+          errBox.innerText = "Неверный номер или пароль";
           errBox.style.display = 'block';
           return;
         }
 
-        if (userProfile.is_banned) {
-          showBanScreen(userProfile.ban_reason);
-          return;
-        }
+        const pubKey = await initCrypto();
+        await supabase.from('profiles').update({ public_key: pubKey }).eq('id', user.id);
+        user.public_key = pubKey;
 
-        const pubKey = await initClientCrypto();
-        await supabase.from('profiles').update({ public_key: pubKey }).eq('id', userProfile.id);
-        userProfile.public_key = pubKey;
-
-        completeSession(userProfile);
+        onAuthSuccess(user);
       }
     }
 
-    function completeSession(userRecord) {
-      activeUser = userRecord;
-      localStorage.setItem('vortex_session_token', JSON.stringify(userRecord));
+    function onAuthSuccess(user) {
+      activeUser = user;
+      localStorage.setItem('vortex_session_token', JSON.stringify(user));
       document.getElementById('authScreen').style.display = 'none';
-      document.getElementById('mainHeader').style.display = 'flex';
       document.getElementById('mainInterface').style.display = 'block';
-      document.getElementById('bottomBar').style.display = 'flex';
+      document.getElementById('bottomTabbar').style.display = 'flex';
 
-      if (userRecord.role === 'admin' || userRecord.username === 'vortex') {
-        document.getElementById('adminBadgeNode').style.display = 'block';
-      }
-
-      renderProfileInfo();
-      loadActiveDialogs();
-      listenRealtimeMessages();
+      renderProfile();
+      loadDialogs();
+      listenRealtime();
     }
 
     function logoutSession() {
@@ -615,128 +757,142 @@
       location.reload();
     }
 
-    function showBanScreen(reason) {
-      document.getElementById('banReasonText').innerText = reason || "Нарушение регламента платформы";
-      document.getElementById('banOverlay').style.display = 'flex';
+    /* Настройки & Профиль */
+    function renderProfile() {
+      document.getElementById('profileNameDisplay').innerText = activeUser.username;
+      document.getElementById('profilePhoneDisplay').innerText = activeUser.phone;
+      
+      const toggle = document.getElementById('hidePhoneToggle');
+      if (activeUser.hide_phone) toggle.classList.add('active');
+      else toggle.classList.remove('active');
     }
 
-    /* ========================================================================
-       ПОИСК И КОНТАКТЫ
-       ======================================================================== */
+    function openSecuritySheet() {
+      document.getElementById('securityModal').style.display = 'flex';
+    }
+
+    async function togglePrivacySetting() {
+      const toggle = document.getElementById('hidePhoneToggle');
+      const newState = !activeUser.hide_phone;
+
+      await supabase.from('profiles').update({ hide_phone: newState }).eq('id', activeUser.id);
+      activeUser.hide_phone = newState;
+
+      if (newState) toggle.classList.add('active');
+      else toggle.classList.remove('active');
+    }
+
+    /* Поиск контактов */
     async function executeUserSearch() {
-      const rawQuery = document.getElementById('globalSearchQuery').value.trim();
-      const resultsContainer = document.getElementById('searchResultsArea');
-      resultsContainer.innerHTML = '';
+      const q = document.getElementById('globalSearchQuery').value.trim();
+      const area = document.getElementById('searchResultsArea');
+      area.innerHTML = '';
+      if (!q) return;
 
-      if (!rawQuery) return;
+      const cleanQ = q.toLowerCase().replace('@', '');
 
-      const cleanQuery = rawQuery.toLowerCase().replace('@', '');
-
-      // Ищем по никнейму или по номеру телефона (если не скрыт)
-      const { data: foundUsers } = await supabase
+      const { data: results } = await supabase
         .from('profiles')
         .select('*')
-        .or(`username.ilike.%${cleanQuery}%,and(phone.eq.${rawQuery},hide_phone.eq.false)`)
-        .limit(20);
+        .or(`username.ilike.%${cleanQ}%,and(phone.eq.${q},hide_phone.eq.false)`)
+        .limit(15);
 
-      if (!foundUsers || foundUsers.length === 0) {
-        resultsContainer.innerHTML = '<p style="color: var(--text-sub); font-size: 13px;">Ничего не найдено</p>';
+      if (!results || results.length === 0) {
+        area.innerHTML = '<p style="color: var(--text-secondary); font-size: 13px; text-align: center; margin-top: 14px;">Пользователи не найдены</p>';
         return;
       }
 
-      foundUsers.forEach(u => {
+      results.forEach(u => {
         if (u.id === activeUser.id) return;
         const row = document.createElement('div');
-        row.className = 'glass-panel-subtle';
-        row.style.padding = '12px 16px';
-        row.style.display = 'flex';
-        row.style.justifyContent = 'space-between';
-        row.style.alignItems = 'center';
-
-        const displayPhone = u.hide_phone ? 'Номер скрыт' : u.phone;
+        row.className = 'settings-group';
+        row.style.marginBottom = '8px';
+        const phone = u.hide_phone ? 'Номер скрыт' : u.phone;
 
         row.innerHTML = `
-          <div>
-            <strong style="font-size: 14px;">@${u.username}</strong>
-            <span style="font-size: 11px; color: var(--text-sub); display: block;">${displayPhone}</span>
+          <div class="settings-item">
+            <div>
+              <h4 style="font-size: 15px; font-weight: 700;">@${u.username}</h4>
+              <p style="font-size: 12px; color: var(--text-secondary);">${phone}</p>
+            </div>
+            <button class="btn-vortex" style="padding: 6px 12px; font-size: 11px;" onclick="startChat('${u.id}', '${u.username}', '${phone}', '${u.public_key || ''}')">Написать</button>
           </div>
-          <button class="btn-vortex" style="padding: 8px 14px; font-size: 10px;" onclick="openChatWithUser('${u.id}', '${u.username}', '${displayPhone}', '${u.public_key || ''}')">НАПИСАТЬ</button>
         `;
-        resultsContainer.appendChild(row);
+        area.appendChild(row);
       });
     }
 
-    /* ========================================================================
-       МЕССЕНДЖЕР И ЧАТЫ
-       ======================================================================== */
-    async function loadActiveDialogs() {
-      const { data: userChats } = await supabase
+    /* Мессенджер */
+    async function loadDialogs() {
+      const { data: chats } = await supabase
         .from('chats')
         .select('*')
         .or(`user1_id.eq.${activeUser.id},user2_id.eq.${activeUser.id}`);
 
       const box = document.getElementById('activeDialogsBox');
       box.innerHTML = '';
-      if (!userChats || userChats.length === 0) {
-        box.innerHTML = '<p style="color: var(--text-sub); font-size: 12px; text-align: center; margin-top: 20px;">Нет активных диалогов. Найдите собеседника в контактах.</p>';
+      if (!chats || chats.length === 0) {
+        box.innerHTML = '<p style="color: var(--text-secondary); font-size: 13px; text-align: center; margin-top: 40px;">Нет активных сообщений</p>';
         return;
       }
 
-      for (const chat of userChats) {
-        const peerId = chat.user1_id === activeUser.id ? chat.user2_id : chat.user1_id;
-        const { data: peerProfile } = await supabase.from('profiles').select('*').eq('id', peerId).single();
-        if (!peerProfile) continue;
+      for (const c of chats) {
+        const peerId = c.user1_id === activeUser.id ? c.user2_id : c.user1_id;
+        const { data: peer } = await supabase.from('profiles').select('*').eq('id', peerId).single();
+        if (!peer) continue;
 
         const row = document.createElement('div');
-        row.className = 'glass-panel-subtle';
-        row.style.padding = '14px';
-        row.style.cursor = 'pointer';
+        row.className = 'settings-group';
+        row.style.marginBottom = '6px';
+        const phone = peer.hide_phone ? 'Номер скрыт' : peer.phone;
 
-        const displayPhone = peerProfile.hide_phone ? 'Номер скрыт' : peerProfile.phone;
-
-        row.onclick = () => openChatWithUser(peerProfile.id, peerProfile.username, displayPhone, peerProfile.public_key);
         row.innerHTML = `
-          <div style="display: flex; justify-content: space-between;">
-            <strong style="font-size: 14px;">@${peerProfile.username}</strong>
-            <span style="font-size: 11px; color: var(--text-sub);">${displayPhone}</span>
+          <div class="settings-item" onclick="startChat('${peer.id}', '${peer.username}', '${phone}', '${peer.public_key}')">
+            <div style="display: flex; gap: 12px; align-items: center;">
+              <div class="avatar-wrap" style="width: 44px; height: 44px;"></div>
+              <div>
+                <h4 style="font-size: 15px; font-weight: 700;">${peer.username}</h4>
+                <p style="font-size: 12px; color: var(--text-secondary);">${phone}</p>
+              </div>
+            </div>
+            <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
           </div>
         `;
         box.appendChild(row);
       }
     }
 
-    async function openChatWithUser(peerId, peerName, peerPhone, peerPubKey) {
-      // Ищем или создаем диалог
-      let { data: existingChat } = await supabase.from('chats')
+    async function startChat(peerId, peerName, peerPhone, peerPubKey) {
+      let { data: chat } = await supabase.from('chats')
         .select('*')
         .or(`and(user1_id.eq.${activeUser.id},user2_id.eq.${peerId}),and(user1_id.eq.${peerId},user2_id.eq.${activeUser.id})`)
         .single();
 
-      if (!existingChat) {
+      if (!chat) {
         const { data: newChat } = await supabase.from('chats').insert([{
           user1_id: activeUser.id,
           user2_id: peerId
         }]).select().single();
-        existingChat = newChat;
+        chat = newChat;
       }
 
-      openedChatContext = { chat: existingChat, peerId, peerName, peerPhone };
+      openedChatContext = { chat, peerId, peerName, peerPhone };
 
       document.getElementById('chatsListContainer').style.display = 'none';
       document.getElementById('chatRoomContainer').style.display = 'flex';
-      document.getElementById('currentChatPeerName').innerText = `@${peerName}`;
+      document.getElementById('currentChatPeerName').innerText = peerName;
       document.getElementById('currentChatPeerPhone').innerText = peerPhone;
 
       await computeSharedKey(peerPubKey);
-      loadRoomMessages(existingChat.id);
-      switchMainTab('chats');
+      loadMessages(chat.id);
+      switchNavTab('chats');
     }
 
     function closeChatRoom() {
       document.getElementById('chatRoomContainer').style.display = 'none';
-      document.getElementById('chatsListContainer').style.display = 'flex';
+      document.getElementById('chatsListContainer').style.display = 'block';
       openedChatContext = null;
-      loadActiveDialogs();
+      loadDialogs();
     }
 
     async function sendEncryptedPayload(attachedMedia = null) {
@@ -779,7 +935,7 @@
       reader.readAsDataURL(file);
     }
 
-    async function loadRoomMessages(chatId) {
+    async function loadMessages(chatId) {
       const { data: msgs } = await supabase
         .from('messages')
         .select('*')
@@ -802,70 +958,41 @@
 
         if (m.media_url) {
           if (m.media_type === 'image') {
-            content += `<img src="${m.media_url}" style="width: 100%; max-width: 260px; border-radius: 10px; margin-top: 4px;">`;
+            content += `<img src="${m.media_url}" style="width: 100%; max-width: 240px; border-radius: 10px; margin-top: 4px;">`;
           } else if (m.media_type === 'video') {
-            content += `<video src="${m.media_url}" controls style="width: 100%; max-width: 260px; border-radius: 10px; margin-top: 4px;"></video>`;
+            content += `<video src="${m.media_url}" controls style="width: 100%; max-width: 240px; border-radius: 10px; margin-top: 4px;"></video>`;
           } else {
             content += `<a href="${m.media_url}" download="${m.file_name}" style="color: inherit; text-decoration: underline; font-size: 12px; margin-top: 4px; display: block;">📄 ${m.file_name || 'Файл'}</a>`;
           }
         }
 
-        bubble.innerHTML = content + `<span style="font-size: 8px; opacity: 0.6; align-self: flex-end; margin-top: 2px;">${new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>`;
+        bubble.innerHTML = content + `<span style="font-size: 9px; opacity: 0.6; align-self: flex-end;">${new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>`;
         container.appendChild(bubble);
       }
       container.scrollTop = container.scrollHeight;
     }
 
-    function listenRealtimeMessages() {
+    function listenRealtime() {
       supabase.channel('messages_realtime_room')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
           if (openedChatContext && payload.new.chat_id === openedChatContext.chat.id) {
-            loadRoomMessages(openedChatContext.chat.id);
+            loadMessages(openedChatContext.chat.id);
           }
         })
         .subscribe();
     }
 
-    /* ========================================================================
-       ПРИВАТНОСТЬ И НАСТРОЙКИ
-       ======================================================================== */
-    function renderProfileInfo() {
-      document.getElementById('profileUsernameVal').innerText = `@${activeUser.username}`;
-      document.getElementById('profilePhoneVal').innerText = activeUser.phone;
-      
-      const toggle = document.getElementById('hidePhoneSwitch');
-      if (activeUser.hide_phone) {
-        toggle.classList.add('active');
-      } else {
-        toggle.classList.remove('active');
-      }
-    }
-
-    async function toggleHidePhoneSetting() {
-      const toggle = document.getElementById('hidePhoneSwitch');
-      const newState = !activeUser.hide_phone;
-
-      await supabase.from('profiles').update({ hide_phone: newState }).eq('id', activeUser.id);
-      activeUser.hide_phone = newState;
-
-      if (newState) {
-        toggle.classList.add('active');
-      } else {
-        toggle.classList.remove('active');
-      }
-    }
-
-    /* ========================================================================
-       МАРШРУТИЗАЦИЯ
-       ======================================================================== */
-    function switchMainTab(tab) {
-      ['chats', 'contacts', 'profile'].forEach(t => {
+    /* Навигация по табам */
+    function switchNavTab(tabName) {
+      ['contacts', 'calls', 'chats', 'settings'].forEach(t => {
         document.getElementById(`view${t.charAt(0).toUpperCase() + t.slice(1)}`).style.display = 'none';
-        document.getElementById(`tabBtn_${t}`).classList.remove('active');
+        document.getElementById(`tab_${t}`).classList.remove('active');
       });
 
-      document.getElementById(`view${tab.charAt(0).toUpperCase() + tab.slice(1)}`).style.display = 'block';
-      document.getElementById(`tabBtn_${tab}`).classList.add('active');
+      document.getElementById(`view${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`).style.display = 'block';
+      document.getElementById(`tab_${tabName}`).classList.add('active');
+
+      if (tabName === 'chats') loadDialogs();
     }
 
     window.addEventListener('DOMContentLoaded', async () => {
@@ -873,12 +1000,8 @@
       if (saved) {
         const parsed = JSON.parse(saved);
         const { data: dbAccount } = await supabase.from('profiles').select('*').eq('id', parsed.id).single();
-        if (dbAccount && dbAccount.is_banned) {
-          showBanScreen(dbAccount.ban_reason);
-          return;
-        }
-        await initClientCrypto();
-        completeSession(dbAccount || parsed);
+        await initCrypto();
+        onAuthSuccess(dbAccount || parsed);
       } else {
         document.getElementById('authScreen').style.display = 'flex';
       }
