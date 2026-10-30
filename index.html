@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>VORTEX MAX</title>
+  <title>VORTEX</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Unbounded:wght@700;800;900&display=swap" rel="stylesheet">
@@ -11,17 +11,17 @@
 
   <style>
     :root {
-      --bg-main: #0c0d10;
-      --bg-surface: #16171b;
-      --bg-card: #1f2026;
-      --bg-card-hover: #26272e;
-      --border-subtle: rgba(255, 255, 255, 0.08);
+      --bg-main: #0c0d11;
+      --bg-surface: #15161b;
+      --bg-card: #1d1f26;
+      --bg-card-hover: #252730;
+      --border-subtle: rgba(255, 255, 255, 0.07);
       --accent-blue: #2563eb;
       --accent-blue-glow: #3b82f6;
       --accent-danger: #ef4444;
       --text-main: #ffffff;
       --text-secondary: #8e909a;
-      --text-muted: #5e606b;
+      --text-muted: #575965;
       --badge-red: #ef4444;
     }
 
@@ -39,6 +39,8 @@
 
     body {
       background-color: var(--bg-main);
+      background-image: radial-gradient(circle at 50% 0%, #151722 0%, var(--bg-main) 70%);
+      background-attachment: fixed;
       color: var(--text-main);
       font-family: 'Inter', -apple-system, sans-serif;
       min-height: 100vh;
@@ -51,7 +53,6 @@
       letter-spacing: -0.03em;
     }
 
-    /* Верхняя статусная панель */
     .top-bar {
       padding: 16px 20px 10px;
       display: flex;
@@ -59,7 +60,7 @@
       align-items: center;
       position: sticky;
       top: 0;
-      background: rgba(12, 13, 16, 0.88);
+      background: rgba(12, 13, 17, 0.88);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       z-index: 100;
@@ -77,7 +78,7 @@
       padding: 0 16px calc(80px + env(safe-area-inset-bottom, 0px));
     }
 
-    /* Группы настроек в стиле MAX / Telegram */
+    /* Карточки настроек */
     .settings-group {
       background: var(--bg-surface);
       border-radius: 16px;
@@ -136,7 +137,6 @@
       height: 18px;
     }
 
-    /* Профиль плашка */
     .profile-card {
       padding: 16px;
       display: flex;
@@ -152,12 +152,11 @@
       background: #1f2026;
       background-size: cover;
       background-position: center;
-      position: relative;
       flex-shrink: 0;
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    /* Нижний бар MAX */
+    /* Навбар */
     .tabbar {
       position: fixed;
       bottom: 0;
@@ -165,7 +164,7 @@
       right: 0;
       height: calc(58px + env(safe-area-inset-bottom, 0px));
       padding-bottom: env(safe-area-inset-bottom, 0px);
-      background: rgba(18, 19, 23, 0.95);
+      background: rgba(18, 19, 24, 0.95);
       backdrop-filter: blur(25px);
       -webkit-backdrop-filter: blur(25px);
       border-top: 1px solid var(--border-subtle);
@@ -207,7 +206,7 @@
       border-radius: 10px;
     }
 
-    /* Чат окно */
+    /* Пузыри чата */
     .chat-bubble {
       max-width: 80%;
       padding: 10px 14px;
@@ -245,7 +244,9 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
+      transition: opacity 0.2s;
     }
+    .btn-vortex:active { opacity: 0.85; }
 
     .input-vortex {
       width: 100%;
@@ -262,12 +263,11 @@
       border-color: var(--accent-blue-glow);
     }
 
-    /* Модалки */
     .modal-backdrop {
       position: fixed;
       inset: 0;
       z-index: 99999;
-      background: rgba(8, 9, 12, 0.95);
+      background: rgba(8, 9, 13, 0.95);
       backdrop-filter: blur(30px);
       -webkit-backdrop-filter: blur(30px);
       display: flex;
@@ -307,11 +307,11 @@
 </head>
 <body>
 
-  <!-- ВХОД / РЕГИСТРАЦИЯ ПО ТЕЛЕФОНУ -->
+  <!-- АВТОРИЗАЦИЯ -->
   <div id="authScreen" class="modal-backdrop" style="display: none;">
     <div style="width: 100%; max-width: 360px; background: var(--bg-surface); padding: 28px 20px; border-radius: 20px; border: 1px solid var(--border-subtle);">
-      <h2 class="brand-font" style="font-size: 22px; text-align: center; margin-bottom: 4px;">VORTEX MAX</h2>
-      <p style="text-align: center; color: var(--text-secondary); font-size: 12px; margin-bottom: 22px;">Быстрый и защищённый мессенджер</p>
+      <h2 class="brand-font" style="font-size: 24px; text-align: center; margin-bottom: 4px;">VORTEX</h2>
+      <p style="text-align: center; color: var(--text-secondary); font-size: 12px; margin-bottom: 22px;">Безопасный мессенджер</p>
 
       <div style="display: flex; gap: 8px; margin-bottom: 16px;">
         <button id="authTab_login" class="btn-vortex" style="flex: 1;" onclick="toggleAuthMode('login')">Вход</button>
@@ -338,10 +338,10 @@
     </div>
   </div>
 
-  <!-- ГЛАВНЫЙ ИНТЕРФЕЙС -->
+  <!-- ОСНОВНОЙ ИНТЕРФЕЙС -->
   <div id="mainInterface" style="display: none;">
 
-    <!-- 1. ВКЛАДКА: КОНТАКТЫ -->
+    <!-- 1. КОНТАКТЫ -->
     <div id="viewContacts" class="main-view-container" style="display: none;">
       <div class="top-bar">
         <h1 class="page-title">Контакты</h1>
@@ -352,24 +352,23 @@
       <div id="searchResultsArea" style="display: flex; flex-direction: column; gap: 8px;"></div>
     </div>
 
-    <!-- 2. ВКЛАДКА: ЗВОНКИ -->
+    <!-- 2. ЗВОНКИ -->
     <div id="viewCalls" class="main-view-container" style="display: none;">
       <div class="top-bar">
         <h1 class="page-title">Звонки</h1>
       </div>
       <div class="settings-group" style="padding: 24px; text-align: center; margin-top: 20px;">
-        <p style="color: var(--text-secondary); font-size: 14px;">История звонков пуста</p>
-        <span style="font-size: 12px; color: var(--text-muted); display: block; margin-top: 4px;">Все вызовы шифруются E2EE-протоколом</span>
+        <p style="color: var(--text-secondary); font-size: 14px;">История вызовов пуста</p>
+        <span style="font-size: 12px; color: var(--text-muted); display: block; margin-top: 4px;">Все звонки защищены E2EE</span>
       </div>
     </div>
 
-    <!-- 3. ВКЛАДКА: ЧАТЫ -->
+    <!-- 3. ЧАТЫ -->
     <div id="viewChats" class="main-view-container">
       <div class="top-bar">
         <h1 class="page-title">Чаты</h1>
       </div>
 
-      <!-- Список диалогов -->
       <div id="chatsListContainer">
         <div style="margin: 12px 0 16px;">
           <input class="input-vortex" placeholder="Поиск сообщений и чатов...">
@@ -377,7 +376,7 @@
         <div id="activeDialogsBox" style="display: flex; flex-direction: column; gap: 8px;"></div>
       </div>
 
-      <!-- Окно открытого чата -->
+      <!-- Открытый диалог -->
       <div id="chatRoomContainer" style="display: none; height: calc(100vh - 130px); flex-direction: column;">
         <div style="padding: 10px 0; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border-subtle);">
           <button class="btn-vortex" style="background: transparent; padding: 6px;" onclick="closeChatRoom()">
@@ -404,13 +403,12 @@
       </div>
     </div>
 
-    <!-- 4. ВКЛАДКА: НАСТРОЙКИ (КОПИЯ СКРИНШОТА MAX) -->
+    <!-- 4. НАСТРОЙКИ VORTEX -->
     <div id="viewSettings" class="main-view-container" style="display: none;">
       <div class="top-bar">
         <h1 class="page-title">Настройки</h1>
       </div>
 
-      <!-- Плашка Профиля -->
       <div class="settings-group">
         <div class="settings-item profile-card">
           <div id="profileAvatarNode" class="avatar-wrap"></div>
@@ -422,7 +420,6 @@
         </div>
       </div>
 
-      <!-- Пригласить и Сервисы -->
       <div class="settings-group">
         <div class="settings-item">
           <div class="settings-item-left">
@@ -444,7 +441,6 @@
         </div>
       </div>
 
-      <!-- Основные разделы управления -->
       <div class="settings-group">
         <div class="settings-item">
           <div class="settings-item-left">
@@ -463,7 +459,7 @@
             </div>
             <div>
               <span class="settings-item-text">Безопасность</span>
-              <span class="settings-item-subtext" style="display: block;">E2EE шифрование, ключи</span>
+              <span class="settings-item-subtext" style="display: block;">Шифрование диалогов, приватность</span>
             </div>
           </div>
           <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
@@ -480,7 +476,6 @@
         </div>
       </div>
 
-      <!-- Контент и кастомизация -->
       <div class="settings-group">
         <div class="settings-item">
           <div class="settings-item-left">
@@ -531,7 +526,7 @@
             <div class="settings-icon-box">
               <svg style="width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2;" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
             </div>
-            <span class="settings-item-text">MAX для бизнеса</span>
+            <span class="settings-item-text">VORTEX для бизнеса</span>
           </div>
           <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
@@ -556,14 +551,14 @@
 
       <div style="padding: 12px 0; border-bottom: 1px solid var(--border-subtle);">
         <span style="font-size: 14px; font-weight: 600; display: block;">Шифрование диалогов</span>
-        <span style="font-size: 12px; color: var(--text-secondary);">Военный протокол AES-256-GCM + ECDH</span>
+        <span style="font-size: 12px; color: var(--text-secondary);">E2EE сквозной протокол AES-256-GCM + ECDH</span>
       </div>
 
       <button class="btn-vortex" style="width: 100%; margin-top: 20px;" onclick="document.getElementById('securityModal').style.display='none'">Готово</button>
     </div>
   </div>
 
-  <!-- ТАББАР (4 Вкладки в стиле MAX) -->
+  <!-- ТАББАР -->
   <nav id="bottomTabbar" class="tabbar" style="display: none;">
     <button id="tab_contacts" class="tab-btn" onclick="switchNavTab('contacts')">
       <svg style="width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2;" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -757,7 +752,7 @@
       location.reload();
     }
 
-    /* Настройки & Профиль */
+    /* Настройки */
     function renderProfile() {
       document.getElementById('profileNameDisplay').innerText = activeUser.username;
       document.getElementById('profilePhoneDisplay').innerText = activeUser.phone;
@@ -822,7 +817,7 @@
       });
     }
 
-    /* Мессенджер */
+    /* Чаты */
     async function loadDialogs() {
       const { data: chats } = await supabase
         .from('chats')
@@ -982,7 +977,7 @@
         .subscribe();
     }
 
-    /* Навигация по табам */
+    /* Навигация */
     function switchNavTab(tabName) {
       ['contacts', 'calls', 'chats', 'settings'].forEach(t => {
         document.getElementById(`view${t.charAt(0).toUpperCase() + t.slice(1)}`).style.display = 'none';
